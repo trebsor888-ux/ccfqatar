@@ -41,6 +41,21 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
+  // Clear space below the fixed nav for the hero panels' text/logo, using the nav's *actual*
+  // rendered height rather than a guessed percentage. The nav wraps onto 2-3 lines on phones
+  // and grows taller than its single-row desktop height - an earlier mobile-only CSS override
+  // shrank the hero panel's `top` from 20% down to 14-16% (meant to bring the headline up
+  // sooner on a shorter mobile hero), which on real phones put the headline right under, and
+  // often overlapping, the now-taller wrapped nav. Measuring via ResizeObserver instead of
+  // guessing a fixed number means this stays correct on any device without per-breakpoint
+  // constants. See --nav-h usage on .wlc-hero-panel / .wlc-hero-logo3 in index.html's <style>.
+  function updateNavHeight() {
+    heroSection.style.setProperty("--nav-h", nav.getBoundingClientRect().height + "px");
+  }
+  updateNavHeight();
+  var navResizeObs = new ResizeObserver(updateNavHeight);
+  navResizeObs.observe(nav);
+
   // Apple-style mega dropdown (ABOUT -> CCF Main church logo/link)
   const megaPanel = document.getElementById("wlcMegaPanel");
   if (megaPanel) {
