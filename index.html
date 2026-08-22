@@ -114,10 +114,14 @@
     max-height:0; overflow:hidden; opacity:0; width:100%;
     transition:max-height .35s ease, opacity .3s ease, margin .35s ease;
   }
-  .wlc-mobile-submenu.open { max-height:140px; opacity:1; margin-top:10px; }
+  /* Bumped from 140px to 260px so the ABOUT submenu (now 2 stacked entries: main church + ICP
+     D.Corner, with a divider) fits without clipping - MINISTRIES still has just one entry so
+     this extra headroom is simply unused there, harmless either way. */
+  .wlc-mobile-submenu.open { max-height:260px; opacity:1; margin-top:10px; }
   .wlc-mobile-submenu-label { color:rgba(255,255,255,0.45); font-size:10.5px; font-weight:700; letter-spacing:0.14em; }
   .wlc-mobile-submenu-link { display:inline-flex; padding:4px 0 !important; }
   .wlc-mobile-submenu-link img { height:26px; width:auto; display:block; }
+  .wlc-mobile-submenu-divider { width:60%; height:1px; background:rgba(255,255,255,0.12); margin:2px 0; }
 
   /* Apple-style full-width mega dropdown (desktop/tablet, >900px): one shared panel, content
      swapped per tab via data-active on the panel matched against data-content on each block
@@ -133,9 +137,14 @@
   }
   .wlc-mega-panel.open { opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
   .wlc-mega-inner { max-width:1100px; margin:0 auto; padding:10px 3vw; align-items:center; gap:18px; }
-  .wlc-mega-content { display:none; align-items:center; gap:18px; }
-  .wlc-mega-panel[data-active="about"] .wlc-mega-content[data-content="about"] { display:flex; }
+  .wlc-mega-content { display:none; align-items:center; gap:32px; }
+  .wlc-mega-panel[data-active="about"] .wlc-mega-content[data-content="about"] { display:flex; flex-direction:column; align-items:flex-start; gap:14px; }
   .wlc-mega-panel[data-active="ministries"] .wlc-mega-content[data-content="ministries"] { display:flex; }
+  /* ABOUT now holds two entries (main church + ICP D.Corner), ICP D.Corner stacked directly
+     below the main church entry (not side by side), each its own label+logo group, separated
+     by a thin horizontal divider. */
+  .wlc-mega-item { display:flex; align-items:center; gap:18px; }
+  .wlc-mega-divider { width:100%; height:1px; background:rgba(255,255,255,0.14); }
   .wlc-mega-label { color:rgba(255,255,255,0.5); font-size:10.5px; font-weight:700; letter-spacing:0.16em; line-height:1.4; white-space:nowrap; }
   .wlc-mega-link { display:inline-flex; }
   .wlc-mega-link img { height:22px; width:auto; display:block; filter:drop-shadow(0 4px 14px rgba(0,0,0,.5)); transition:transform .25s ease, filter .25s ease; }
@@ -306,10 +315,19 @@
 <div class="wlc-mega-panel" id="wlcMegaPanel">
   <div class="wlc-mega-inner">
     <div class="wlc-mega-content" data-content="about">
-      <div class="wlc-mega-label">VISIT OUR MAIN CHURCH</div>
-      <a class="wlc-mega-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
-        <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
-      </a>
+      <div class="wlc-mega-item">
+        <div class="wlc-mega-label">VISIT OUR MAIN CHURCH</div>
+        <a class="wlc-mega-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
+          <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
+        </a>
+      </div>
+      <div class="wlc-mega-divider"></div>
+      <div class="wlc-mega-item">
+        <div class="wlc-mega-label">ICP D.CORNER</div>
+        <a class="wlc-mega-link" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">
+          <img src="assets/welcome-icp-dcorner-logo.png" alt="ICP D.Corner" />
+        </a>
+      </div>
     </div>
     <div class="wlc-mega-content" data-content="ministries">
       <div class="wlc-mega-label">SMALL GROUP MANAGEMENT MINISTRY</div>
@@ -340,6 +358,11 @@
       <div class="wlc-mobile-submenu-label">VISIT OUR MAIN CHURCH</div>
       <a class="wlc-mobile-submenu-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
         <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
+      </a>
+      <div class="wlc-mobile-submenu-divider"></div>
+      <div class="wlc-mobile-submenu-label">ICP D.CORNER</div>
+      <a class="wlc-mobile-submenu-link" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">
+        <img src="assets/welcome-icp-dcorner-logo.png" alt="ICP D.Corner" />
       </a>
     </div>
   </div>
