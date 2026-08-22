@@ -10,6 +10,11 @@ const SGMQ_APP_URL = "https://sgmq-connect.onrender.com";
 
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("loginLink").href = SGMQ_APP_URL + "/login";
+  // Every other login entry point (mega dropdown + mobile disclosure row for MINISTRIES) points
+  // at the same URL - wire them all from the one constant above.
+  document.querySelectorAll("#megaMinistriesLoginLink, #mobileMinistriesLoginLink").forEach(function (el) {
+    el.href = SGMQ_APP_URL + "/login";
+  });
   document.querySelectorAll(".join-link").forEach(function (el) {
     el.href = SGMQ_APP_URL + "/join";
   });
@@ -79,17 +84,46 @@ document.addEventListener("DOMContentLoaded", function () {
   if (mobileMenu) mobileMenu.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", closeMobileMenu); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeMobileMenu(); });
 
-  // Apple-style mega dropdown (ABOUT -> CCF Main church logo/link)
+  // Apple-style disclosure rows inside the mobile overlay (ABOUT/MINISTRIES): tapping the
+  // chevron expands a submenu with the same sub-link the desktop mega dropdown shows for that
+  // tab, accordion-style (opening one closes any other that was open) - matches apple.com's
+  // mobile nav pattern, since hover-based dropdowns don't work on touch.
+  var mobileChevrons = mobileMenu ? Array.from(mobileMenu.querySelectorAll(".wlc-mobile-chevron")) : [];
+  mobileChevrons.forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var key = btn.getAttribute("data-toggle");
+      var submenu = mobileMenu.querySelector('.wlc-mobile-submenu[data-submenu="' + key + '"]');
+      var willOpen = !(submenu && submenu.classList.contains("open"));
+      mobileMenu.querySelectorAll(".wlc-mobile-submenu.open").forEach(function (el) { el.classList.remove("open"); });
+      mobileChevrons.forEach(function (c) { c.classList.remove("open"); c.setAttribute("aria-expanded", "false"); });
+      if (willOpen) {
+        if (submenu) submenu.classList.add("open");
+        btn.classList.add("open");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  // Apple-style mega dropdown (desktop/tablet hover, >900px): one shared panel whose content
+  // swaps per tab via data-active (see .wlc-mega-content CSS)
   const megaPanel = document.getElementById("wlcMegaPanel");
   if (megaPanel) {
     let megaCloseTimer;
     const positionMega = function () { megaPanel.style.top = nav.getBoundingClientRect().bottom + "px"; };
-    const openMega = function () { clearTimeout(megaCloseTimer); positionMega(); megaPanel.classList.add("open"); };
     const closeMegaDelayed = function () {
       clearTimeout(megaCloseTimer);
       megaCloseTimer = setTimeout(function () { megaPanel.classList.remove("open"); }, 200);
     };
     document.querySelectorAll(".wlc-nav-item[data-dropdown]").forEach(function (item) {
+      var key = item.getAttribute("data-dropdown") || "";
+      var openMega = function () {
+        clearTimeout(megaCloseTimer);
+        megaPanel.dataset.active = key;
+        positionMega();
+        megaPanel.classList.add("open");
+      };
       item.addEventListener("mouseenter", openMega);
       item.addEventListener("mouseleave", closeMegaDelayed);
     });

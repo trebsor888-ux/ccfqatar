@@ -64,14 +64,16 @@
   .wlc-nav-links a.active { color:#fff; }
   .wlc-nav-links a.active::after { transform:scaleX(1); }
   .wlc-nav-right { display:flex; align-items:center; gap:1.2vw; }
-  .wlc-login-pill {
-    color:#fff; text-decoration:none; font-size:12.5px; font-weight:700;
-    border:1px solid rgba(255,255,255,0.35); border-radius:999px; padding:8px 18px;
-    letter-spacing:0.03em; background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-    transition:background .3s ease, border-color .3s ease, box-shadow .3s ease, color .3s ease;
+  /* Nav login control: the "Small Group Management Ministry" half of the header logo (cropped
+     out separately as assets/welcome-logo-sgm.png) doubles as the login entry point, replacing
+     the old text pill. */
+  .wlc-nav-login-logo { display:flex; align-items:center; }
+  .wlc-nav-login-logo img {
+    height:34px; width:auto; display:block;
+    filter:drop-shadow(0 2px 8px rgba(0,0,0,.45));
+    transition:transform .25s ease, filter .25s ease;
   }
-  .wlc-login-pill:hover { background:rgba(93,202,165,0.18); border-color:#5DCAA5; color:#eafff5; box-shadow:0 0 22px rgba(93,202,165,.55), 0 0 60px rgba(93,202,165,.25); }
+  .wlc-nav-login-logo:hover img { transform:scale(1.06); filter:drop-shadow(0 2px 14px rgba(93,202,165,.6)) brightness(1.15); }
 
   /* Hamburger trigger + full-screen overlay menu, shown only <=900px (see media query below) -
      Apple-style mobile nav pattern, replacing the old wrap-onto-multiple-rows inline links. */
@@ -93,7 +95,33 @@
   .wlc-mobile-close { position:absolute; top:18px; right:5vw; width:40px; height:40px; border:none; background:transparent; color:#fff; font-size:32px; line-height:1; cursor:pointer; }
   @media (min-width:901px) { .wlc-mobile-menu, .wlc-burger { display:none !important; } }
 
-  /* Apple-style full-width mega dropdown under ABOUT */
+  /* Apple-style disclosure rows for ABOUT/MINISTRIES inside the mobile overlay - hover doesn't
+     exist on touch, so the desktop mega dropdown (below) is hidden on mobile and these rows
+     give the same sub-links via a tap-to-expand chevron instead, same pattern as apple.com's
+     mobile menu. */
+  .wlc-mobile-item { display:flex; flex-direction:column; align-items:center; width:100%; max-width:320px; }
+  .wlc-mobile-item-row { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; }
+  .wlc-mobile-item-row a { padding:6px 0; }
+  .wlc-mobile-chevron {
+    display:flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border:none; background:transparent; color:rgba(255,255,255,0.6);
+    cursor:pointer; padding:0; transition:transform .3s ease, color .3s ease; flex-shrink:0;
+  }
+  .wlc-mobile-chevron svg { width:16px; height:16px; display:block; }
+  .wlc-mobile-chevron.open { color:#2FBF71; transform:rotate(180deg); }
+  .wlc-mobile-submenu {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    max-height:0; overflow:hidden; opacity:0; width:100%;
+    transition:max-height .35s ease, opacity .3s ease, margin .35s ease;
+  }
+  .wlc-mobile-submenu.open { max-height:140px; opacity:1; margin-top:10px; }
+  .wlc-mobile-submenu-label { color:rgba(255,255,255,0.45); font-size:10.5px; font-weight:700; letter-spacing:0.14em; }
+  .wlc-mobile-submenu-link { display:inline-flex; padding:4px 0 !important; }
+  .wlc-mobile-submenu-link img { height:26px; width:auto; display:block; }
+
+  /* Apple-style full-width mega dropdown (desktop/tablet, >900px): one shared panel, content
+     swapped per tab via data-active on the panel matched against data-content on each block
+     (see JS). */
   .wlc-nav-item { position:relative; }
   .wlc-mega-panel {
     position:fixed; left:0; right:0; top:96px; z-index:999;
@@ -104,7 +132,10 @@
     transition:opacity .28s cubic-bezier(.2,.8,.2,1), transform .28s cubic-bezier(.2,.8,.2,1), visibility .28s ease;
   }
   .wlc-mega-panel.open { opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
-  .wlc-mega-inner { max-width:1100px; margin:0 auto; padding:10px 3vw; display:flex; align-items:center; gap:18px; }
+  .wlc-mega-inner { max-width:1100px; margin:0 auto; padding:10px 3vw; align-items:center; gap:18px; }
+  .wlc-mega-content { display:none; align-items:center; gap:18px; }
+  .wlc-mega-panel[data-active="about"] .wlc-mega-content[data-content="about"] { display:flex; }
+  .wlc-mega-panel[data-active="ministries"] .wlc-mega-content[data-content="ministries"] { display:flex; }
   .wlc-mega-label { color:rgba(255,255,255,0.5); font-size:10.5px; font-weight:700; letter-spacing:0.16em; line-height:1.4; white-space:nowrap; }
   .wlc-mega-link { display:inline-flex; }
   .wlc-mega-link img { height:22px; width:auto; display:block; filter:drop-shadow(0 4px 14px rgba(0,0,0,.5)); transition:transform .25s ease, filter .25s ease; }
@@ -170,7 +201,7 @@
   }
 
   @media (max-width:900px) {
-    /* Fixed px padding (not vw) on the right so LOGIN + the hamburger keep consistent,
+    /* Fixed px padding (not vw) on the right so the login logo + the hamburger keep consistent,
        comfortable clearance from the screen edge on every phone, instead of a value that
        shrinks on narrower devices. */
     .wlc-nav { padding:14px 18px; }
@@ -193,6 +224,7 @@
   @media (max-width:480px) {
     .wlc-logo-img { height:52px; }
     .wlc-nav.scrolled .wlc-logo-img { height:44px; }
+    .wlc-nav-login-logo img { height:28px; }
     .wlc-hero { height:82vh; min-height:440px; }
   }
 
@@ -220,11 +252,18 @@
     <a href="#wlc-service" data-sec="wlc-service">SERVICE</a>
     <a href="#wlc-resources" data-sec="wlc-resources">RESOURCES</a>
     <a href="#wlc-events" data-sec="wlc-events">EVENTS</a>
-    <a href="#wlc-ministries" data-sec="wlc-ministries">MINISTRIES</a>
+    <div class="wlc-nav-item" data-dropdown="ministries">
+      <a href="#wlc-ministries" data-sec="wlc-ministries">MINISTRIES</a>
+    </div>
     <a href="#wlc-contact" data-sec="wlc-contact">CONTACT</a>
   </div>
   <div class="wlc-nav-right">
-    <a class="wlc-login-pill" id="loginLink" href="#">LOGIN</a>
+    <!-- The "Small Group Management Ministry" half of the header logo (cropped out separately
+         as assets/welcome-logo-sgm.png) doubles as the login entry point, replacing the old
+         text pill. href is wired to SGMQ_APP_URL + "/login" in script.js. -->
+    <a class="wlc-nav-login-logo" id="loginLink" href="#" aria-label="Login to Small Group Management Ministry">
+      <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
+    </a>
     <button type="button" class="wlc-burger" id="wlcBurger" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -233,25 +272,64 @@
 
 <div class="wlc-mega-panel" id="wlcMegaPanel">
   <div class="wlc-mega-inner">
-    <div class="wlc-mega-label">VISIT OUR MAIN CHURCH</div>
-    <a class="wlc-mega-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
-      <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
-    </a>
+    <div class="wlc-mega-content" data-content="about">
+      <div class="wlc-mega-label">VISIT OUR MAIN CHURCH</div>
+      <a class="wlc-mega-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
+        <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
+      </a>
+    </div>
+    <div class="wlc-mega-content" data-content="ministries">
+      <div class="wlc-mega-label">SMALL GROUP MANAGEMENT MINISTRY</div>
+      <a class="wlc-mega-link" id="megaMinistriesLoginLink" href="#">
+        <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
+      </a>
+    </div>
   </div>
 </div>
 
 <!-- Apple-style full-screen mobile/tablet menu (<=900px) - replaces the old approach of letting
      .wlc-nav-links wrap onto 2-3 rows inline in the nav bar. Below 900px .wlc-nav-links is
      hidden entirely (see CSS) and this overlay, toggled by the hamburger button above, is the
-     only way to navigate. -->
+     only way to navigate. ABOUT/MINISTRIES get a tap-to-expand chevron since the desktop hover
+     dropdown above is hidden on mobile - same disclosure-row pattern as apple.com's mobile nav. -->
 <div class="wlc-mobile-menu" id="wlcMobileMenu">
   <button type="button" class="wlc-mobile-close" id="wlcMobileClose" aria-label="Close menu">&times;</button>
   <a href="#wlc-home" data-sec="wlc-home">HOME</a>
-  <a href="#wlc-about" data-sec="wlc-about">ABOUT</a>
+
+  <div class="wlc-mobile-item">
+    <div class="wlc-mobile-item-row">
+      <a href="#wlc-about" data-sec="wlc-about">ABOUT</a>
+      <button type="button" class="wlc-mobile-chevron" data-toggle="about" aria-label="Show CCF main church link" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+    <div class="wlc-mobile-submenu" data-submenu="about">
+      <div class="wlc-mobile-submenu-label">VISIT OUR MAIN CHURCH</div>
+      <a class="wlc-mobile-submenu-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
+        <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
+      </a>
+    </div>
+  </div>
+
   <a href="#wlc-service" data-sec="wlc-service">SERVICE</a>
   <a href="#wlc-resources" data-sec="wlc-resources">RESOURCES</a>
   <a href="#wlc-events" data-sec="wlc-events">EVENTS</a>
-  <a href="#wlc-ministries" data-sec="wlc-ministries">MINISTRIES</a>
+
+  <div class="wlc-mobile-item">
+    <div class="wlc-mobile-item-row">
+      <a href="#wlc-ministries" data-sec="wlc-ministries">MINISTRIES</a>
+      <button type="button" class="wlc-mobile-chevron" data-toggle="ministries" aria-label="Show Small Group Management Ministry login" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+    <div class="wlc-mobile-submenu" data-submenu="ministries">
+      <div class="wlc-mobile-submenu-label">SMALL GROUP MANAGEMENT MINISTRY</div>
+      <a class="wlc-mobile-submenu-link" id="mobileMinistriesLoginLink" href="#">
+        <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
+      </a>
+    </div>
+  </div>
+
   <a href="#wlc-contact" data-sec="wlc-contact">CONTACT</a>
 </div>
 
