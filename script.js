@@ -6,7 +6,7 @@
 // Today (no domain yet): the SGMQ-Connect system's Render URL.
 // Later, once ccfqatar.org + sgmq-connect.ccfqatar.org are set up, change this to
 // "https://sgmq-connect.ccfqatar.org" and nothing else in this file needs to change.
-const SGMQ_APP_URL = "https://ccf-qatar-sgm.onrender.com";
+const SGMQ_APP_URL = "https://sgmq-connect.onrender.com";
 
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("loginLink").href = SGMQ_APP_URL + "/login";
