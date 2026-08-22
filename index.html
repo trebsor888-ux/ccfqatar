@@ -183,12 +183,14 @@
     to { opacity:1; transform:translateX(-50%) translateY(0); filter:brightness(1.1) drop-shadow(0 0 32px rgba(93,202,165,.7)) drop-shadow(0 0 64px rgba(93,202,165,.4)); }
   }
   /* Button stays centered on the logo (both now share left:50% + translateX(-50%)). Vertical
-     position follows "logo's top + logo's rendered height + gap" - logo is now 50vw wide at a
-     1536x1024 (1.5:1) source aspect, so its height is ~50vw / 1.5 = 33.3vw. Sized up
+     position follows "logo's top + a height estimate + gap" - the true render height is
+     ~50vw/1.5 = 33.3vw (1536x1024 source aspect), but the logo PNG has visible transparent
+     padding below the glyph, so using the full 33.3vw plus a 26px gap left the button looking
+     too far below the logo. Backed off to 30vw + 16px to sit close without touching. Sized up
      (padding/font-size) from the shared .wlc-glass-btn base since this is the hero's main
      call-to-action, not a secondary link like panels 1/2's button. */
   .wlc-hero-panel-3 .wlc-glass-btn {
-    position:absolute; left:50%; top:calc(max(18%, calc(var(--nav-h, 96px) + 34px)) + 33.3vw + 26px);
+    position:absolute; left:50%; top:calc(max(18%, calc(var(--nav-h, 96px) + 34px)) + 30vw + 16px);
     margin-top:0; transform:translateX(-50%) translateY(24px);
     padding:clamp(16px,1.5vw,24px) clamp(34px,3.2vw,54px);
     font-size:clamp(14px,1.25vw,20px);
@@ -232,13 +234,13 @@
        left edge, and bumped up from 60% to 66% width to match the desktop enlargement. */
     .wlc-hero-logo3 { left:50%; width:66%; }
     /* Follows directly under the logo instead of pinning to the hero's bottom edge (the old
-       bottom:6% left a large empty gap on tall phones, since the logo sits near the top). Logo
-       is 66vw wide at a 1536x1024 (1.5:1) source aspect, so its rendered height is ~66vw / 1.5
-       = 44vw; button top = logo's top offset + that height + a small gap. Re-derive the 44vw
-       figure if the logo's mobile width ever changes from 66%. Centered on the same left:50% as
-       the logo now, matching the desktop treatment. */
+       bottom:6% left a large empty gap on tall phones, since the logo sits near the top). True
+       render height is ~66vw/1.5 = 44vw (1536x1024 source aspect), but the logo PNG has visible
+       transparent padding below the glyph, so the full 44vw + 22px gap put the button too far
+       down - backed off to 40vw + 14px to sit close without touching. Centered on the same
+       left:50% as the logo now, matching the desktop treatment. */
     .wlc-hero-panel-3 .wlc-glass-btn {
-      left:50%; top:calc(var(--nav-h, 96px) + 34px + 44vw + 22px); bottom:auto;
+      left:50%; top:calc(var(--nav-h, 96px) + 34px + 40vw + 14px); bottom:auto;
       transform:translateX(-50%);
       padding:14px 32px; font-size:14px;
     }
