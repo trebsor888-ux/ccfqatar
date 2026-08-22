@@ -42,19 +42,42 @@ document.addEventListener("DOMContentLoaded", function () {
   onScroll();
 
   // Clear space below the fixed nav for the hero panels' text/logo, using the nav's *actual*
-  // rendered height rather than a guessed percentage. The nav wraps onto 2-3 lines on phones
-  // and grows taller than its single-row desktop height - an earlier mobile-only CSS override
-  // shrank the hero panel's `top` from 20% down to 14-16% (meant to bring the headline up
-  // sooner on a shorter mobile hero), which on real phones put the headline right under, and
-  // often overlapping, the now-taller wrapped nav. Measuring via ResizeObserver instead of
-  // guessing a fixed number means this stays correct on any device without per-breakpoint
-  // constants. See --nav-h usage on .wlc-hero-panel / .wlc-hero-logo3 in index.html's <style>.
+  // rendered height rather than a guessed percentage - it stays a single row on every screen
+  // size now (mobile uses the hamburger overlay below instead of wrapping), but measuring
+  // instead of hardcoding keeps this correct even if the nav's height ever changes. See
+  // --nav-h usage on .wlc-hero-panel / .wlc-hero-logo3 in index.html's <style>.
   function updateNavHeight() {
     heroSection.style.setProperty("--nav-h", nav.getBoundingClientRect().height + "px");
   }
   updateNavHeight();
   var navResizeObs = new ResizeObserver(updateNavHeight);
   navResizeObs.observe(nav);
+
+  // Apple-style full-screen mobile/tablet menu (<=900px): hamburger toggles a full-screen
+  // overlay nav, replacing the old approach of letting .wlc-nav-links wrap onto 2-3 rows
+  // inline in the nav bar (which ate a lot of vertical space and was the root cause of an
+  // earlier hero/nav overlap bug). Locks body scroll while open.
+  var burger = document.getElementById("wlcBurger");
+  var mobileMenu = document.getElementById("wlcMobileMenu");
+  var mobileClose = document.getElementById("wlcMobileClose");
+  function closeMobileMenu() {
+    if (burger) { burger.classList.remove("open"); burger.setAttribute("aria-expanded", "false"); }
+    if (mobileMenu) mobileMenu.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  function openMobileMenu() {
+    if (burger) { burger.classList.add("open"); burger.setAttribute("aria-expanded", "true"); }
+    if (mobileMenu) mobileMenu.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function toggleMobileMenu() {
+    if (mobileMenu && mobileMenu.classList.contains("open")) closeMobileMenu();
+    else openMobileMenu();
+  }
+  if (burger) burger.addEventListener("click", toggleMobileMenu);
+  if (mobileClose) mobileClose.addEventListener("click", closeMobileMenu);
+  if (mobileMenu) mobileMenu.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", closeMobileMenu); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeMobileMenu(); });
 
   // Apple-style mega dropdown (ABOUT -> CCF Main church logo/link)
   const megaPanel = document.getElementById("wlcMegaPanel");
@@ -104,15 +127,15 @@ document.addEventListener("DOMContentLoaded", function () {
   }, { threshold: 0.15 });
   revealEls.forEach(function (el) { revealObs.observe(el); });
 
-  const navLinks = document.querySelectorAll(".wlc-nav-links a");
+  const navLinks = document.querySelectorAll(".wlc-nav-links a, .wlc-mobile-menu a");
   const secIds = ["wlc-home", "wlc-about", "wlc-service", "wlc-resources", "wlc-events", "wlc-ministries", "wlc-contact"];
   const secEls = secIds.map(function (id) { return document.getElementById(id); });
   const navObs = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
       if (e.isIntersecting) {
         navLinks.forEach(function (a) { a.classList.remove("active"); });
-        const match = document.querySelector('.wlc-nav-links a[data-sec="' + e.target.id + '"]');
-        if (match) match.classList.add("active");
+        const matches = document.querySelectorAll('.wlc-nav-links a[data-sec="' + e.target.id + '"], .wlc-mobile-menu a[data-sec="' + e.target.id + '"]');
+        matches.forEach(function (m) { m.classList.add("active"); });
       }
     });
   }, { threshold: 0.5 });

@@ -73,6 +73,26 @@
   }
   .wlc-login-pill:hover { background:rgba(93,202,165,0.18); border-color:#5DCAA5; color:#eafff5; box-shadow:0 0 22px rgba(93,202,165,.55), 0 0 60px rgba(93,202,165,.25); }
 
+  /* Hamburger trigger + full-screen overlay menu, shown only <=900px (see media query below) -
+     Apple-style mobile nav pattern, replacing the old wrap-onto-multiple-rows inline links. */
+  .wlc-burger { display:none; flex-direction:column; justify-content:center; gap:5px; width:34px; height:34px; border:none; background:transparent; cursor:pointer; padding:0; flex-shrink:0; }
+  .wlc-burger span { display:block; width:100%; height:2px; background:#fff; border-radius:2px; transition:transform .3s ease, opacity .3s ease; }
+  .wlc-burger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .wlc-burger.open span:nth-child(2) { opacity:0; }
+  .wlc-burger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .wlc-mobile-menu {
+    position:fixed; inset:0; z-index:1100;
+    background:rgba(6,13,18,0.98); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+    opacity:0; visibility:hidden; transform:translateY(-14px); pointer-events:none;
+    transition:opacity .3s ease, transform .3s ease, visibility .3s ease;
+  }
+  .wlc-mobile-menu.open { opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
+  .wlc-mobile-menu a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:22px; font-weight:700; letter-spacing:0.04em; padding:6px 0; }
+  .wlc-mobile-menu a.active, .wlc-mobile-menu a:hover { color:#2FBF71; }
+  .wlc-mobile-close { position:absolute; top:18px; right:5vw; width:40px; height:40px; border:none; background:transparent; color:#fff; font-size:32px; line-height:1; cursor:pointer; }
+  @media (min-width:901px) { .wlc-mobile-menu, .wlc-burger { display:none !important; } }
+
   /* Apple-style full-width mega dropdown under ABOUT */
   .wlc-nav-item { position:relative; }
   .wlc-mega-panel {
@@ -131,7 +151,7 @@
   .wlc-fullbleed { position:relative; width:100%; aspect-ratio:1280/720; background-color:#05080a; overflow:hidden; scroll-margin-top:76px; opacity:0; transform:scale(1.04); transition:opacity 1s cubic-bezier(.2,.7,.3,1), transform 1s cubic-bezier(.2,.7,.3,1); }
   .wlc-fullbleed.in-view { opacity:1; transform:scale(1); }
   .wlc-carousel { position:relative; }
-  .wlc-slide { position:absolute; inset:0; overflow:hidden; opacity:0; transition:opacity 1.4s ease; }
+  .wlc-slide { position:absolute; inset:0; overflow:hidden; opacity:0; transition:opacity 0.35s ease; }
   .wlc-slide.active { opacity:1; }
   .wlc-slide::before, .wlc-slide::after { content:""; position:absolute; background-image:var(--img); background-position:center; background-repeat:no-repeat; }
   .wlc-slide::before { inset:-2%; background-size:cover; filter:blur(38px) brightness(.55) saturate(1.2); transform:scale(1.15); }
@@ -150,13 +170,19 @@
   }
 
   @media (max-width:900px) {
-    .wlc-nav { flex-wrap:wrap; height:auto; padding:14px 4vw; row-gap:10px; }
+    .wlc-nav { padding:14px 4vw; }
     .wlc-nav.scrolled { padding:10px 4vw; }
-    .wlc-nav-links { order:3; width:100%; justify-content:center; flex-wrap:wrap; gap:3vw 5vw; font-size:11px; }
+    .wlc-nav-links { display:none; }
+    .wlc-burger { display:flex; }
     .wlc-hero { height:78vh; min-height:480px; }
     .wlc-hero-panel { max-width:88%; left:5%; }
     .wlc-hero-logo3 { left:5%; width:60%; }
-    .wlc-hero-panel-3 .wlc-glass-btn { left:5%; top:auto; bottom:6%; transform:none; }
+    /* Follows directly under the logo instead of pinning to the hero's bottom edge (the old
+       bottom:6% left a large empty gap on tall phones, since the logo sits near the top). Logo
+       is 60vw wide at a 1536x1024 (1.5:1) source aspect, so its rendered height is ~60vw / 1.5
+       = 40vw; button top = logo's top offset + that height + a small gap. Re-derive the 40vw
+       figure if the logo's mobile width ever changes from 60%. */
+    .wlc-hero-panel-3 .wlc-glass-btn { left:5%; top:calc(var(--nav-h, 96px) + 34px + 40vw + 22px); bottom:auto; transform:none; }
     .wlc-hero-panel-3.active .wlc-glass-btn { animation-name:heroBtnUpMobile; }
     @keyframes heroBtnUpMobile { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
   }
@@ -195,6 +221,9 @@
   </div>
   <div class="wlc-nav-right">
     <a class="wlc-login-pill" id="loginLink" href="#">LOGIN</a>
+    <button type="button" class="wlc-burger" id="wlcBurger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
@@ -205,6 +234,21 @@
       <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
     </a>
   </div>
+</div>
+
+<!-- Apple-style full-screen mobile/tablet menu (<=900px) - replaces the old approach of letting
+     .wlc-nav-links wrap onto 2-3 rows inline in the nav bar. Below 900px .wlc-nav-links is
+     hidden entirely (see CSS) and this overlay, toggled by the hamburger button above, is the
+     only way to navigate. -->
+<div class="wlc-mobile-menu" id="wlcMobileMenu">
+  <button type="button" class="wlc-mobile-close" id="wlcMobileClose" aria-label="Close menu">&times;</button>
+  <a href="#wlc-home" data-sec="wlc-home">HOME</a>
+  <a href="#wlc-about" data-sec="wlc-about">ABOUT</a>
+  <a href="#wlc-service" data-sec="wlc-service">SERVICE</a>
+  <a href="#wlc-resources" data-sec="wlc-resources">RESOURCES</a>
+  <a href="#wlc-events" data-sec="wlc-events">EVENTS</a>
+  <a href="#wlc-ministries" data-sec="wlc-ministries">MINISTRIES</a>
+  <a href="#wlc-contact" data-sec="wlc-contact">CONTACT</a>
 </div>
 
 <section class="wlc-hero" id="wlc-home">
