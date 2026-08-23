@@ -145,7 +145,11 @@
      by a thin horizontal divider. */
   .wlc-mega-item { display:flex; align-items:center; gap:18px; }
   .wlc-mega-divider { width:100%; height:1px; background:rgba(255,255,255,0.14); }
-  .wlc-mega-label { color:rgba(255,255,255,0.5); font-size:10.5px; font-weight:700; letter-spacing:0.16em; line-height:1.4; white-space:nowrap; }
+  .wlc-mega-label { color:rgba(255,255,255,0.5); font-size:10.5px; font-weight:700; letter-spacing:0.16em; line-height:1.4; white-space:nowrap; transition:color .25s ease; }
+  /* Bright-white label on hover so a visitor gets a clear "you're pointing at this one" cue,
+     scoped to whichever item (VISIT OUR MAIN CHURCH / ICP D.CORNER / the Ministries entry) the
+     mouse is actually over - not the whole panel at once. */
+  .wlc-mega-item:hover .wlc-mega-label { color:#fff; }
   .wlc-mega-link { display:inline-flex; }
   .wlc-mega-link img { height:22px; width:auto; display:block; filter:drop-shadow(0 4px 14px rgba(0,0,0,.5)); transition:transform .25s ease, filter .25s ease; }
   .wlc-mega-link:hover img { transform:scale(1.06); filter:drop-shadow(0 4px 18px rgba(93,202,165,.55)) brightness(1.15); }
@@ -330,10 +334,12 @@
       </div>
     </div>
     <div class="wlc-mega-content" data-content="ministries">
-      <div class="wlc-mega-label">SMALL GROUP MANAGEMENT MINISTRY</div>
-      <a class="wlc-mega-link" id="megaMinistriesLoginLink" href="#">
-        <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
-      </a>
+      <div class="wlc-mega-item">
+        <div class="wlc-mega-label">SMALL GROUP MANAGEMENT MINISTRY</div>
+        <a class="wlc-mega-link" id="megaMinistriesLoginLink" href="#">
+          <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
+        </a>
+      </div>
     </div>
   </div>
 </div>
