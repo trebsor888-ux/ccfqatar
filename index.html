@@ -119,6 +119,8 @@
      this extra headroom is simply unused there, harmless either way. */
   .wlc-mobile-submenu.open { max-height:260px; opacity:1; margin-top:10px; }
   .wlc-mobile-submenu-label { color:rgba(255,255,255,0.45); font-size:10.5px; font-weight:700; letter-spacing:0.14em; }
+  .wlc-mobile-submenu-textlink { display:inline-block; text-decoration:none; cursor:pointer; }
+  .wlc-mobile-submenu-textlink:hover, .wlc-mobile-submenu-textlink:active { color:#fff; }
   .wlc-mobile-submenu-link { display:inline-flex; padding:4px 0 !important; }
   .wlc-mobile-submenu-link img { height:26px; width:auto; display:block; }
   .wlc-mobile-submenu-divider { width:60%; height:1px; background:rgba(255,255,255,0.12); margin:2px 0; }
@@ -150,6 +152,9 @@
      scoped to whichever item (VISIT OUR MAIN CHURCH / ICP D.CORNER / the Ministries entry) the
      mouse is actually over - not the whole panel at once. */
   .wlc-mega-item:hover .wlc-mega-label { color:#fff; }
+  /* v3.49.0: About's two entries are now plain text links (logos removed) - .wlc-mega-textlink
+     layers onto .wlc-mega-label so the label itself is the clickable/hoverable element. */
+  .wlc-mega-textlink { display:inline-block; text-decoration:none; cursor:pointer; }
   .wlc-mega-link { display:inline-flex; }
   .wlc-mega-link img { height:22px; width:auto; display:block; filter:drop-shadow(0 4px 14px rgba(0,0,0,.5)); transition:transform .25s ease, filter .25s ease; }
   .wlc-mega-link:hover img { transform:scale(1.06); filter:drop-shadow(0 4px 18px rgba(93,202,165,.55)) brightness(1.15); }
@@ -320,25 +325,16 @@
   <div class="wlc-mega-inner">
     <div class="wlc-mega-content" data-content="about">
       <div class="wlc-mega-item">
-        <div class="wlc-mega-label">VISIT OUR MAIN CHURCH</div>
-        <a class="wlc-mega-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
-          <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
-        </a>
+        <a class="wlc-mega-label wlc-mega-textlink" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">VISIT OUR CCF MAIN CHURCH</a>
       </div>
       <div class="wlc-mega-divider"></div>
       <div class="wlc-mega-item">
-        <div class="wlc-mega-label">ICP D.CORNER</div>
-        <a class="wlc-mega-link" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">
-          <img src="assets/welcome-icp-dcorner-logo.png" alt="ICP D.Corner" />
-        </a>
+        <a class="wlc-mega-label wlc-mega-textlink" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">ICP DISCIPLESHIP CORNER</a>
       </div>
     </div>
     <div class="wlc-mega-content" data-content="ministries">
       <div class="wlc-mega-item">
-        <div class="wlc-mega-label">SMALL GROUP MANAGEMENT MINISTRY</div>
-        <a class="wlc-mega-link" id="megaMinistriesLoginLink" href="#">
-          <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
-        </a>
+        <a class="wlc-mega-label wlc-mega-textlink" id="megaMinistriesLoginLink" href="#">SMALL GROUP MANAGEMENT</a>
       </div>
     </div>
   </div>
@@ -361,15 +357,9 @@
       </button>
     </div>
     <div class="wlc-mobile-submenu" data-submenu="about">
-      <div class="wlc-mobile-submenu-label">VISIT OUR MAIN CHURCH</div>
-      <a class="wlc-mobile-submenu-link" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">
-        <img src="assets/welcome-ccf-main-logo.png" alt="CCF Main" />
-      </a>
+      <a class="wlc-mobile-submenu-label wlc-mobile-submenu-textlink" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">VISIT OUR CCF MAIN CHURCH</a>
       <div class="wlc-mobile-submenu-divider"></div>
-      <div class="wlc-mobile-submenu-label">ICP D.CORNER</div>
-      <a class="wlc-mobile-submenu-link" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">
-        <img src="assets/welcome-icp-dcorner-logo.png" alt="ICP D.Corner" />
-      </a>
+      <a class="wlc-mobile-submenu-label wlc-mobile-submenu-textlink" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">ICP DISCIPLESHIP CORNER</a>
     </div>
   </div>
 
@@ -385,10 +375,7 @@
       </button>
     </div>
     <div class="wlc-mobile-submenu" data-submenu="ministries">
-      <div class="wlc-mobile-submenu-label">SMALL GROUP MANAGEMENT MINISTRY</div>
-      <a class="wlc-mobile-submenu-link" id="mobileMinistriesLoginLink" href="#">
-        <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
-      </a>
+      <a class="wlc-mobile-submenu-label wlc-mobile-submenu-textlink" id="mobileMinistriesLoginLink" href="#">SMALL GROUP MANAGEMENT</a>
     </div>
   </div>
 
