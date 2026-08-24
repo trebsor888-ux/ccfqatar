@@ -130,15 +130,16 @@
      (see JS). */
   .wlc-nav-item { position:relative; }
   .wlc-mega-panel {
-    position:fixed; left:0; right:0; top:96px; z-index:999;
-    background:rgba(6,13,18,0.94); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
-    border-top:1px solid rgba(255,255,255,0.08);
-    box-shadow:0 26px 50px rgba(0,0,0,.4);
-    opacity:0; visibility:hidden; transform:translateY(-10px); pointer-events:none;
-    transition:opacity .28s cubic-bezier(.2,.8,.2,1), transform .28s cubic-bezier(.2,.8,.2,1), visibility .28s ease;
+    position:fixed; left:0; top:96px; z-index:999;
+    background:rgba(6,13,18,0.96); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:14px;
+    box-shadow:0 26px 50px rgba(0,0,0,.45);
+    opacity:0; visibility:hidden; transform:translateY(-8px); pointer-events:none;
+    transition:opacity .22s cubic-bezier(.2,.8,.2,1), transform .22s cubic-bezier(.2,.8,.2,1), visibility .22s ease;
   }
   .wlc-mega-panel.open { opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
-  .wlc-mega-inner { max-width:1100px; margin:0 auto; padding:10px 3vw; align-items:center; gap:18px; }
+  .wlc-mega-inner { width:max-content; max-width:calc(100vw - 32px); margin:0; padding:14px 22px; align-items:center; gap:18px; }
   .wlc-mega-content { display:none; align-items:center; gap:32px; }
   .wlc-mega-panel[data-active="about"] .wlc-mega-content[data-content="about"] { display:flex; flex-direction:column; align-items:flex-start; gap:14px; }
   .wlc-mega-panel[data-active="ministries"] .wlc-mega-content[data-content="ministries"] { display:flex; }
@@ -152,7 +153,7 @@
      scoped to whichever item (VISIT OUR MAIN CHURCH / ICP D.CORNER / the Ministries entry) the
      mouse is actually over - not the whole panel at once. */
   .wlc-mega-item:hover .wlc-mega-label { color:#fff; }
-  /* v3.49.0: About's two entries are now plain text links (logos removed) - .wlc-mega-textlink
+  /* About's two entries are now plain text links (logos removed) - .wlc-mega-textlink
      layers onto .wlc-mega-label so the label itself is the clickable/hoverable element. */
   .wlc-mega-textlink { display:inline-block; text-decoration:none; cursor:pointer; }
   .wlc-mega-link { display:inline-flex; }

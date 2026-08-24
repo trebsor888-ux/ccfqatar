@@ -106,12 +106,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Apple-style mega dropdown (desktop/tablet hover, >900px): one shared panel whose content
-  // swaps per tab via data-active (see .wlc-mega-content CSS)
+  // Dropdown (desktop/tablet hover, >900px): one shared panel whose content swaps per tab via
+  // data-active (see .wlc-mega-content CSS). Position is re-centered under whichever tab is
+  // currently hovered (activeItem) - was previously a full-width bar flush under the whole nav;
+  // floats as a small card centered under that specific tab instead, clamped so it never runs
+  // off either edge of the viewport.
   const megaPanel = document.getElementById("wlcMegaPanel");
   if (megaPanel) {
     let megaCloseTimer;
-    const positionMega = function () { megaPanel.style.top = nav.getBoundingClientRect().bottom + "px"; };
+    let megaActiveItem = null;
+    const positionMega = function () {
+      megaPanel.style.top = (nav.getBoundingClientRect().bottom + 8) + "px";
+      if (!megaActiveItem) return;
+      var itemRect = megaActiveItem.getBoundingClientRect();
+      var panelWidth = megaPanel.getBoundingClientRect().width;
+      var margin = 16;
+      var centered = itemRect.left + itemRect.width / 2 - panelWidth / 2;
+      var clamped = Math.max(margin, Math.min(centered, window.innerWidth - panelWidth - margin));
+      megaPanel.style.left = clamped + "px";
+    };
     const closeMegaDelayed = function () {
       clearTimeout(megaCloseTimer);
       megaCloseTimer = setTimeout(function () { megaPanel.classList.remove("open"); }, 200);
@@ -120,8 +133,11 @@ document.addEventListener("DOMContentLoaded", function () {
       var key = item.getAttribute("data-dropdown") || "";
       var openMega = function () {
         clearTimeout(megaCloseTimer);
+        megaActiveItem = item;
         megaPanel.dataset.active = key;
-        positionMega();
+        // data-active swap can change the panel's rendered width - measure/position on the next
+        // frame so the width used for centering reflects the content that's about to show.
+        requestAnimationFrame(positionMega);
         megaPanel.classList.add("open");
       };
       item.addEventListener("mouseenter", openMega);
@@ -130,6 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
     megaPanel.addEventListener("mouseenter", function () { clearTimeout(megaCloseTimer); });
     megaPanel.addEventListener("mouseleave", closeMegaDelayed);
     window.addEventListener("scroll", function () { if (megaPanel.classList.contains("open")) positionMega(); }, { passive: true });
+    window.addEventListener("resize", function () { if (megaPanel.classList.contains("open")) positionMega(); });
   }
 
   let heroSlideIndex = 0;
