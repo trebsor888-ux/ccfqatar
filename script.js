@@ -207,4 +207,20 @@ document.addEventListener("DOMContentLoaded", function () {
   startCarousel("wlc-resources", 4500);
   startCarousel("wlc-about", 4500);
   startCarousel("wlc-events", 4500);
+
+  // Contact form: no backend endpoint exists yet for this public site — client-only
+  // mailto fallback until a real submission target (backend endpoint or a service like
+  // Formspree) is wired up.
+  const wlcContactForm = document.getElementById("wlcContactForm");
+  if (wlcContactForm) {
+    wlcContactForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("wlcName").value.trim();
+      const email = document.getElementById("wlcEmail").value.trim();
+      const message = document.getElementById("wlcMessage").value.trim();
+      const subject = "Website inquiry from " + name;
+      const body = "Name: " + name + "\nEmail: " + email + "\n\n" + message;
+      window.location.href = "mailto:communication@ccfqatar.org?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    });
+  }
 });
