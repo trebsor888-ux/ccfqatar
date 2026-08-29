@@ -33,10 +33,9 @@ document.addEventListener("DOMContentLoaded", function () {
     else nav.classList.remove("scrolled");
 
     const progress = Math.min(y / (heroHeight * 0.9), 1);
-    const scale = 1 + progress * 0.12;
     const translate = progress * 60;
     const opacity = 1 - progress;
-    heroMedia.style.transform = "translateY(" + translate + "px) scale(" + scale + ")";
+    heroMedia.style.transform = "translateY(" + translate + "px)";
     heroMedia.style.opacity = String(opacity);
     heroPanels.forEach(function (p) {
       p.style.opacity = String(opacity);
