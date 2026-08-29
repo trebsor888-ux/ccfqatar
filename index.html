@@ -298,9 +298,14 @@
   .wlc-footer-register svg { width:14px; height:14px; }
   .wlc-footer-message h3 { color:#122A22; font-size:1.15rem; font-weight:700; margin:0 0 0.6rem; }
   .wlc-footer-message > p { color:rgba(18,42,34,0.65); font-size:0.86rem; line-height:1.6; margin:0 0 1.1rem; }
-  .wlc-footer-dropline span { display:block; color:rgba(18,42,34,0.5); font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.3rem; }
-  .wlc-footer-dropline a { color:#0F6E56; font-size:0.95rem; font-weight:600; text-decoration:none; }
-  .wlc-footer-dropline a:hover { text-decoration:underline; }
+  .wlc-footer-info { margin-top:0.2rem; display:flex; flex-direction:column; gap:1rem; }
+  .wlc-footer-info-label { display:block; color:rgba(18,42,34,0.5); font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+  .wlc-footer-info-block p { margin:0; color:rgba(18,42,34,0.7); font-size:0.86rem; line-height:1.5; }
+  .wlc-footer-info-line { display:flex; align-items:center; gap:7px; }
+  .wlc-footer-info-line + .wlc-footer-info-line { margin-top:0.3rem; }
+  .wlc-footer-info-line svg { width:14px; height:14px; color:#0F6E56; flex-shrink:0; }
+  .wlc-footer-info a { color:#0F6E56; font-weight:600; text-decoration:none; }
+  .wlc-footer-info a:hover { text-decoration:underline; }
   .wlc-footer-formbox { background:#fff; border:1px solid rgba(18,42,34,0.1); border-radius:14px; padding:1.4rem 1.5rem 1.6rem; }
   .wlc-footer-formbox h4 { color:#0F6E56; font-size:0.78rem; font-weight:700; letter-spacing:0.1em; margin:0 0 1rem; }
   .wlc-footer-field { margin-bottom:0.8rem; }
@@ -488,7 +493,7 @@
     <div class="wlc-footer-about">
       <p class="wlc-footer-desc">We are a movement of millions of committed followers of the Lord Jesus Christ meeting in small groups and transforming lives, families, communities, and nations, for the glory of God.</p>
       <div class="wlc-footer-social">
-        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.9h2.6l.4-3.1h-3v-2c0-.9.3-1.5 1.6-1.5H16.6V3.4C16.3 3.3 15.3 3.2 14.2 3.2c-2.4 0-4 1.5-4 4.2v2.3H7.6v3.1h2.6V21h3.3Z"/></svg></a>
+        <a href="https://www.facebook.com/CCFqatar/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.9h2.6l.4-3.1h-3v-2c0-.9.3-1.5 1.6-1.5H16.6V3.4C16.3 3.3 15.3 3.2 14.2 3.2c-2.4 0-4 1.5-4 4.2v2.3H7.6v3.1h2.6V21h3.3Z"/></svg></a>
         <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.6c-.2-1-1-1.7-1.9-2C18 5.2 12 5.2 12 5.2s-6 0-7.7.4c-1 .2-1.7 1-1.9 2C2 9.3 2 12 2 12s0 2.7.4 4.4c.2 1 1 1.7 1.9 2 1.7.4 7.7.4 7.7.4s6 0 7.7-.4c1-.2 1.7-1 1.9-2 .4-1.7.4-4.4.4-4.4s0-2.7-.4-4.4ZM10 15.2V8.8l5.5 3.2-5.5 3.2Z"/></svg></a>
         <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1"/></svg></a>
       </div>
@@ -497,9 +502,22 @@
     <div class="wlc-footer-message">
       <h3>We'd love to hear from you!</h3>
       <p>Do you have any inquiries about discipleship groups, want to worship with us, volunteer in our ministries, attend to our upcoming events and other matters related to CCF? We are so blessed to hear from you by sending us a message. We'll make sure to get back to you as soon as possible.</p>
-      <div class="wlc-footer-dropline">
-        <span>Drop us a line</span>
-        <a href="mailto:communication@ccfqatar.org">communication@ccfqatar.org</a>
+      <div class="wlc-footer-info">
+        <div class="wlc-footer-info-block">
+          <span class="wlc-footer-info-label">Our address</span>
+          <p>Anglican Center, Religious Complex,<br>Abu Hamour, Doha, Qatar</p>
+        </div>
+        <div class="wlc-footer-info-block">
+          <span class="wlc-footer-info-label">Email or call us</span>
+          <p class="wlc-footer-info-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+            <a href="mailto:communication@ccfqatar.org">communication@ccfqatar.org</a>
+          </p>
+          <p class="wlc-footer-info-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8Z"/></svg>
+            <a href="tel:+97400000000">(974) 0000 0000</a>
+          </p>
+        </div>
       </div>
     </div>
     <div class="wlc-footer-formbox">
