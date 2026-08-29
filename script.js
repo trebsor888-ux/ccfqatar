@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let megaCloseTimer;
     let megaActiveItem = null;
     const positionMega = function () {
-      megaPanel.style.top = (nav.getBoundingClientRect().bottom + 8) + "px";
+      megaPanel.style.top = nav.getBoundingClientRect().bottom + "px";
       if (!megaActiveItem) return;
       var itemRect = megaActiveItem.getBoundingClientRect();
       var panelWidth = megaPanel.getBoundingClientRect().width;

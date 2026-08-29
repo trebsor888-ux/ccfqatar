@@ -134,20 +134,20 @@
     width:max-content; max-width:calc(100vw - 32px);
     background:rgba(6,13,18,0.96); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
     border:1px solid rgba(255,255,255,0.1);
-    border-radius:14px;
+    border-radius:0 0 8px 8px;
     box-shadow:0 26px 50px rgba(0,0,0,.45);
     opacity:0; visibility:hidden; transform:translateY(-8px); pointer-events:none;
     transition:opacity .22s cubic-bezier(.2,.8,.2,1), transform .22s cubic-bezier(.2,.8,.2,1), visibility .22s ease;
   }
   .wlc-mega-panel.open { opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
-  .wlc-mega-inner { width:max-content; max-width:calc(100vw - 32px); margin:0; padding:10px 16px; align-items:center; gap:10px; }
-  .wlc-mega-content { display:none; align-items:center; gap:16px; }
-  .wlc-mega-panel[data-active="about"] .wlc-mega-content[data-content="about"] { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+  .wlc-mega-inner { width:max-content; max-width:calc(100vw - 32px); margin:0; padding:6px 10px; align-items:center; gap:6px; }
+  .wlc-mega-content { display:none; align-items:center; gap:10px; }
+  .wlc-mega-panel[data-active="about"] .wlc-mega-content[data-content="about"] { display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
   .wlc-mega-panel[data-active="ministries"] .wlc-mega-content[data-content="ministries"] { display:flex; }
   /* ABOUT now holds two entries (main church + ICP D.Corner), ICP D.Corner stacked directly
      below the main church entry (not side by side), each its own label+logo group, separated
      by a thin horizontal divider. */
-  .wlc-mega-item { display:flex; align-items:center; gap:10px; }
+  .wlc-mega-item { display:flex; align-items:center; gap:6px; }
   .wlc-mega-divider { width:100%; height:1px; background:rgba(255,255,255,0.14); }
   .wlc-mega-label { color:rgba(255,255,255,0.5); font-size:10.5px; font-weight:700; letter-spacing:0.16em; line-height:1.4; white-space:nowrap; transition:color .25s ease; }
   /* Bright-white label on hover so a visitor gets a clear "you're pointing at this one" cue,
