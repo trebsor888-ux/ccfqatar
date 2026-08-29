@@ -235,13 +235,16 @@
 
   .wlc-reveal { opacity:0; transform:translateY(40px); transition:opacity 0.9s ease, transform 0.9s ease; }
   .wlc-reveal.in-view { opacity:1; transform:translateY(0); }
-  .wlc-ministry-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:1.6vw; }
-  .wlc-ministry-card { background:#fff; border-radius:16px; aspect-ratio:1; display:flex; align-items:center; justify-content:center; padding:1.6vw; box-shadow:0 0.6vw 1.6vw rgba(0,0,0,0.35); transition:transform .3s ease, box-shadow .3s ease; }
+  .wlc-ministry-marquee { overflow:hidden; width:100%; -webkit-mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+  .wlc-ministry-track { display:flex; align-items:center; gap:1.6vw; width:max-content; animation:wlcMinistryScroll 26s linear infinite; }
+  .wlc-ministry-marquee:hover .wlc-ministry-track { animation-play-state:paused; }
+  .wlc-ministry-card { background:#fff; border-radius:16px; width:clamp(110px,14vw,170px); aspect-ratio:1; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:1.6vw; box-shadow:0 0.6vw 1.6vw rgba(0,0,0,0.35); transition:transform .3s ease, box-shadow .3s ease; }
   .wlc-ministry-card:hover { transform:translateY(-6px); box-shadow:0 1vw 2.2vw rgba(0,0,0,0.45); }
   .wlc-ministry-card img { max-width:100%; max-height:100%; object-fit:contain; }
+  @keyframes wlcMinistryScroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
   @media (max-width:768px) {
-    .wlc-ministry-grid { grid-template-columns:repeat(2,1fr); gap:4vw; }
-    .wlc-ministry-card { padding:5vw; }
+    .wlc-ministry-card { width:clamp(90px,26vw,130px); padding:5vw; }
+    .wlc-ministry-track { gap:4vw; }
   }
 
   @media (max-width:900px) {
@@ -479,12 +482,22 @@
   <div style="max-width:1100px; margin:0 auto; text-align:center;">
     <div style="color:#0F6E56; font-size:12px; font-weight:700; letter-spacing:0.25em; margin-bottom:0.6em;">GET INVOLVED</div>
     <h2 style="color:#122A22; font-size:2.6vw; font-weight:800; margin:0 0 2.4em;">Our Ministries</h2>
-    <div class="wlc-ministry-grid">
-      <div class="wlc-ministry-card"><img src="assets/welcome-ministry-nxtgen.png" alt="NxtGen" /></div>
-      <div class="wlc-ministry-card"><img src="assets/welcome-ministry-b1g.png" alt="B1G" /></div>
-      <div class="wlc-ministry-card"><img src="assets/welcome-ministry-elevate.png" alt="Elevate" /></div>
-      <div class="wlc-ministry-card"><img src="assets/welcome-ministry-sports.png" alt="CCF Sports" /></div>
-      <div class="wlc-ministry-card"><img src="assets/welcome-ministry-across.png" alt="A-Cross" /></div>
+    <!-- Auto-scrolling marquee, not a fixed grid, so adding more ministry logos later is just one
+         more <img> line here (and its duplicate below) - no layout/column math to redo. -->
+    <div class="wlc-ministry-marquee">
+      <div class="wlc-ministry-track">
+        <div class="wlc-ministry-card"><img src="assets/welcome-ministry-nxtgen.png" alt="NxtGen" /></div>
+        <div class="wlc-ministry-card"><img src="assets/welcome-ministry-b1g.png" alt="B1G" /></div>
+        <div class="wlc-ministry-card"><img src="assets/welcome-ministry-elevate.png" alt="Elevate" /></div>
+        <div class="wlc-ministry-card"><img src="assets/welcome-ministry-sports.png" alt="CCF Sports" /></div>
+        <div class="wlc-ministry-card"><img src="assets/welcome-ministry-across.png" alt="A-Cross" /></div>
+        <!-- duplicate set so the loop is seamless - keep in sync with the set above -->
+        <div class="wlc-ministry-card" aria-hidden="true"><img src="assets/welcome-ministry-nxtgen.png" alt="" /></div>
+        <div class="wlc-ministry-card" aria-hidden="true"><img src="assets/welcome-ministry-b1g.png" alt="" /></div>
+        <div class="wlc-ministry-card" aria-hidden="true"><img src="assets/welcome-ministry-elevate.png" alt="" /></div>
+        <div class="wlc-ministry-card" aria-hidden="true"><img src="assets/welcome-ministry-sports.png" alt="" /></div>
+        <div class="wlc-ministry-card" aria-hidden="true"><img src="assets/welcome-ministry-across.png" alt="" /></div>
+      </div>
     </div>
   </div>
 </section>
