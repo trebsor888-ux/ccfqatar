@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dgroup — CCF Qatar</title>
+<meta name="description" content="What is a Dgroup? Find your discipleship group at CCF Qatar." />
+<!--
+  Part of the same standalone public site as index.html (see that file's header comment for the
+  full deploy context). This page shares index.html's nav/mobile-menu/mega-dropdown/footer markup,
+  CSS, and script.js verbatim on purpose - same "one shared nav bar" rule applies here: if the nav,
+  mobile menu, mega dropdown, or footer changes on index.html, port the same change here too.
+  Only the hero + the two content sections + the CTA band above the footer are unique to this page.
+-->
+<style>
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:#060D12; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; overflow-x:hidden; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  img,video { max-width:100%; }
+
+  /* ---- Shared nav / mobile menu / mega dropdown - identical to index.html ---- */
+  .wlc-nav {
+    position:fixed; top:0; left:0; right:0; z-index:1000;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 3vw; height:96px;
+    background:rgba(6,13,18,0);
+    backdrop-filter:blur(0px); -webkit-backdrop-filter:blur(0px);
+    border-bottom:1px solid rgba(255,255,255,0);
+    transition:background 0.4s ease, backdrop-filter 0.4s ease, border-color 0.4s ease, height 0.3s ease;
+  }
+  .wlc-nav.scrolled {
+    background:rgba(6,13,18,0.72);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    height:78px;
+  }
+  .wlc-logo-img { height:72px; display:block; transition:height 0.3s ease; }
+  .wlc-nav.scrolled .wlc-logo-img { height:58px; }
+  .wlc-nav-links { display:flex; align-items:center; gap:2.4vw; }
+  .wlc-nav-links a {
+    color:rgba(255,255,255,0.82); text-decoration:none; font-size:13px;
+    font-weight:600; letter-spacing:0.02em; position:relative; padding:6px 0;
+    transition:color 0.25s ease;
+  }
+  .wlc-nav-links a::after {
+    content:''; position:absolute; left:0; right:0; bottom:0; height:2px;
+    background:#2FBF71; transform:scaleX(0); transform-origin:left;
+    transition:transform 0.25s ease;
+  }
+  .wlc-nav-links a:hover { color:#fff; }
+  .wlc-nav-links a.active { color:#fff; }
+  .wlc-nav-links a.active::after { transform:scaleX(1); }
+  .wlc-nav-right { display:flex; align-items:center; gap:1.2vw; }
+  .wlc-nav-login-logo { display:flex; align-items:center; }
+  .wlc-nav-login-logo img {
+    height:34px; width:auto; display:block;
+    filter:drop-shadow(0 2px 8px rgba(0,0,0,.45));
+    transition:transform .25s ease, filter .25s ease;
+  }
+  .wlc-nav-login-logo:hover img { transform:scale(1.06); filter:drop-shadow(0 2px 14px rgba(93,202,165,.6)) brightness(1.15); }
+
+  .wlc-burger { display:none; flex-direction:column; justify-content:center; gap:5px; width:34px; height:34px; border:none; background:transparent; cursor:pointer; padding:0; flex-shrink:0; }
+  .wlc-burger span { display:block; width:100%; height:2px; background:#fff; border-radius:2px; transition:transform .3s ease, opacity .3s ease; }
+  .wlc-burger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .wlc-burger.open span:nth-child(2) { opacity:0; }
+  .wlc-burger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .wlc-mobile-menu {
+    position:fixed; inset:0; z-index:1100;
+    background:rgba(6,13,18,0.98); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+    opacity:0; visibility:hidden; transform:translateY(-14px); pointer-events:none;
+    transition:opacity .3s ease, transform .3s ease, visibility .3s ease;
+  }
+  .wlc-mobile-menu.open { opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
+  .wlc-mobile-menu a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:22px; font-weight:700; letter-spacing:0.04em; padding:6px 0; }
+  .wlc-mobile-menu a.active, .wlc-mobile-menu a:hover { color:#2FBF71; }
+  .wlc-mobile-close { position:absolute; top:18px; right:5vw; width:40px; height:40px; border:none; background:transparent; color:#fff; font-size:32px; line-height:1; cursor:pointer; }
+  @media (min-width:901px) { .wlc-mobile-menu, .wlc-burger { display:none !important; } }
+
+  .wlc-mobile-item { display:flex; flex-direction:column; align-items:center; width:100%; max-width:320px; }
+  .wlc-mobile-item-row { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; }
+  .wlc-mobile-item-row a { padding:6px 0; }
+  .wlc-mobile-chevron {
+    display:flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border:none; background:transparent; color:rgba(255,255,255,0.6);
+    cursor:pointer; padding:0; transition:transform .3s ease, color .3s ease; flex-shrink:0;
+  }
+  .wlc-mobile-chevron svg { width:16px; height:16px; display:block; }
+  .wlc-mobile-chevron.open { color:#2FBF71; transform:rotate(180deg); }
+  .wlc-mobile-submenu {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    max-height:0; overflow:hidden; opacity:0; width:100%;
+    transition:max-height .35s ease, opacity .3s ease, margin .35s ease;
+  }
+  .wlc-mobile-submenu.open { max-height:260px; opacity:1; margin-top:10px; }
+  .wlc-mobile-submenu-label { color:rgba(255,255,255,0.45); font-size:10.5px; font-weight:700; letter-spacing:0.14em; }
+  .wlc-mobile-submenu-textlink { display:inline-block; text-decoration:none; cursor:pointer; }
+  .wlc-mobile-submenu-textlink:hover, .wlc-mobile-submenu-textlink:active { color:#fff; }
+  .wlc-mobile-submenu-link { display:inline-flex; padding:4px 0 !important; }
+  .wlc-mobile-submenu-link img { height:26px; width:auto; display:block; }
+  .wlc-mobile-submenu-divider { width:60%; height:1px; background:rgba(255,255,255,0.12); margin:2px 0; }
+
+  .wlc-nav-item { position:relative; }
+  .wlc-mega-panel {
+    position:fixed; left:0; top:96px; z-index:999;
+    width:max-content; max-width:calc(100vw - 32px);
+    background:rgba(6,13,18,0.72); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.08); border-top:none;
+    border-radius:0 0 8px 8px;
+    box-shadow:0 26px 50px rgba(0,0,0,.45);
+    opacity:0; visibility:hidden; transform:translateY(-8px); pointer-events:none;
+    transition:opacity .22s cubic-bezier(.2,.8,.2,1), transform .22s cubic-bezier(.2,.8,.2,1), visibility .22s ease;
+  }
+  .wlc-mega-panel.open { opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
+  .wlc-mega-inner { width:max-content; max-width:calc(100vw - 32px); margin:0; padding:6px 10px; align-items:center; gap:6px; }
+  .wlc-mega-content { display:none; align-items:center; gap:10px; }
+  .wlc-mega-panel[data-active="about"] .wlc-mega-content[data-content="about"] { display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
+  .wlc-mega-panel[data-active="ministries"] .wlc-mega-content[data-content="ministries"] { display:flex; }
+  .wlc-mega-item { display:flex; align-items:center; gap:6px; }
+  .wlc-mega-divider { width:100%; height:1px; background:rgba(255,255,255,0.14); }
+  .wlc-mega-label { color:rgba(255,255,255,0.5); font-size:10.5px; font-weight:700; letter-spacing:0.16em; line-height:1.4; white-space:nowrap; transition:color .25s ease; }
+  .wlc-mega-item:hover .wlc-mega-label { color:#fff; }
+  .wlc-mega-textlink { display:inline-block; text-decoration:none; cursor:pointer; }
+  .wlc-mega-link { display:inline-flex; }
+  .wlc-mega-link img { height:22px; width:auto; display:block; filter:drop-shadow(0 4px 14px rgba(0,0,0,.5)); transition:transform .25s ease, filter .25s ease; }
+  .wlc-mega-link:hover img { transform:scale(1.06); filter:drop-shadow(0 4px 18px rgba(93,202,165,.55)) brightness(1.15); }
+  @media (max-width:900px) { .wlc-mega-panel { display:none; } }
+
+  @media (max-width:900px) {
+    .wlc-nav { padding:14px 18px; }
+    .wlc-nav.scrolled { padding:10px 18px; }
+    .wlc-nav-links { display:none; }
+    .wlc-nav-right { gap:14px; }
+    .wlc-burger { display:flex; }
+  }
+  @media (max-width:480px) {
+    .wlc-logo-img { height:52px; }
+    .wlc-nav.scrolled .wlc-logo-img { height:44px; }
+    .wlc-nav-login-logo img { height:28px; }
+  }
+
+  /* ---- Page-specific: full-screen video hero, no text/button overlay on the video itself ---- */
+  .dg-hero { position:relative; width:100%; height:100vh; min-height:520px; overflow:hidden; background:#05080a; }
+  .dg-hero video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .dg-hero-scrim { position:absolute; inset:0; background:linear-gradient(180deg, rgba(6,13,18,.35) 0%, rgba(6,13,18,.08) 40%, rgba(6,13,18,.6) 100%); }
+  .dg-scroll-cue {
+    position:absolute; left:50%; bottom:34px; transform:translateX(-50%); z-index:3;
+    color:rgba(255,255,255,0.75); font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase;
+    display:flex; flex-direction:column; align-items:center; gap:8px; animation:dgCueBob 2.2s ease-in-out infinite;
+  }
+  .dg-scroll-cue svg { width:16px; height:16px; }
+  @keyframes dgCueBob { 0%,100% { transform:translateX(-50%) translateY(0); } 50% { transform:translateX(-50%) translateY(8px); } }
+
+  .dg-what { background:#F4F7F5; padding:4.5rem 6.05%; text-align:center; }
+  .dg-what h2 { color:#122A22; font-size:clamp(22px,2.6vw,34px); font-weight:800; margin:0 0 1.1em; }
+  .dg-what p { color:#3D4E48; font-size:clamp(14px,1.1vw,17px); line-height:1.75; max-width:760px; margin:0 auto; }
+
+  .dg-why { background:#fff; padding:4.5rem 6.05%; }
+  .dg-why h2 { color:#122A22; font-size:clamp(22px,2.6vw,34px); font-weight:800; margin:0 0 2.4em; text-align:center; }
+  .dg-why-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.6rem; max-width:1100px; margin:0 auto; }
+  .dg-why-card { background:#F4F7F5; border-radius:14px; padding:1.8rem 1.6rem; border:1px solid rgba(15,110,86,0.1); }
+  .dg-why-card .icon { width:42px; height:42px; border-radius:50%; background:rgba(15,110,86,0.1); color:#0F6E56; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; margin-bottom:14px; }
+  .dg-why-card h3 { color:#0F6E56; font-size:13px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; margin:0 0 10px; }
+  .dg-why-card p { color:#3D4E48; font-size:14px; line-height:1.65; margin:0 0 12px; }
+  .dg-why-card .verse { color:#8A9B94; font-size:12.5px; font-style:italic; line-height:1.6; margin:0; border-top:1px solid rgba(15,110,86,0.12); padding-top:10px; }
+
+  /* CTA band: home page's glowing logo + glass button, reused here, plus social icons, in one
+     transparent glossy row directly above the shared footer. */
+  .dg-cta-band {
+    background:rgba(6,13,18,0.6); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);
+    padding:2.2rem 6.05%;
+    display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:1.4rem 2.2rem;
+  }
+  .dg-cta-logo {
+    width:min(200px,38vw); opacity:0; transform:translateY(20px);
+    filter:brightness(.4) drop-shadow(0 0 0 rgba(93,202,165,0)) drop-shadow(0 0 0 rgba(93,202,165,0));
+    animation:dgLogoGlow 1s .2s cubic-bezier(.16,.84,.36,1) forwards;
+  }
+  @keyframes dgLogoGlow {
+    from { opacity:0; transform:translateY(20px); filter:brightness(.4) drop-shadow(0 0 0 rgba(93,202,165,0)) drop-shadow(0 0 0 rgba(93,202,165,0)); }
+    to { opacity:1; transform:translateY(0); filter:brightness(1.1) drop-shadow(0 0 24px rgba(93,202,165,.7)) drop-shadow(0 0 48px rgba(93,202,165,.4)); }
+  }
+  .dg-cta-btn {
+    display:inline-flex; align-items:center; opacity:0; transform:translateY(16px);
+    padding:clamp(13px,1.2vw,18px) clamp(24px,2.3vw,36px); border:1px solid rgba(255,255,255,0.55); border-radius:999px;
+    background:rgba(255,255,255,0.08); backdrop-filter:blur(10px);
+    color:#fff; text-decoration:none; font-weight:800; font-size:clamp(12px,1vw,15px); letter-spacing:0.1em; text-transform:uppercase;
+    transition:background .3s ease, border-color .3s ease, box-shadow .3s ease, color .3s ease;
+    animation:dgBtnIn .7s 1.1s cubic-bezier(.16,.84,.36,1) forwards;
+  }
+  @keyframes dgBtnIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .dg-cta-btn:hover { background:rgba(93,202,165,0.18); border-color:#5DCAA5; color:#eafff5; box-shadow:0 0 22px rgba(93,202,165,.55), 0 0 60px rgba(93,202,165,.25); }
+
+  .dg-cta-social { display:flex; align-items:center; gap:0.6rem; opacity:0; transform:translateY(16px); animation:dgBtnIn .7s 1.25s cubic-bezier(.16,.84,.36,1) forwards; }
+  .dg-cta-social a {
+    width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.06); color:#fff;
+    transition:background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .dg-cta-social a:hover { background:rgba(93,202,165,0.18); border-color:#5DCAA5; box-shadow:0 0 18px rgba(93,202,165,.5); transform:translateY(-2px); }
+  .dg-cta-social svg { width:16px; height:16px; }
+
+  /* ---- Shared footer bottom links - identical to index.html ---- */
+  .wlc-footer-bottom { max-width:1280px; margin:0 auto; padding:1.6rem 6.05%; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.5rem; }
+  .wlc-footer-bottom p { color:rgba(18,42,34,0.45); font-size:0.82rem; margin:0; }
+  .wlc-footer-bottom-links { display:flex; align-items:center; }
+  .wlc-footer-bottom-links a { color:rgba(18,42,34,0.5); font-size:0.8rem; text-decoration:none; }
+  .wlc-footer-bottom-links a:hover { text-decoration:underline; }
+  .wlc-footer-bottom-links span { color:rgba(18,42,34,0.3); margin:0 8px; }
+  #dg-footer { background:#fff; }
+</style>
+</head>
+<body>
+
+<nav class="wlc-nav" id="wlcNav">
+  <a href="index.html"><img class="wlc-logo-img" src="assets/welcome-logo.png" alt="CCF Qatar" /></a>
+  <div class="wlc-nav-links">
+    <a href="index.html#wlc-home">HOME</a>
+    <div class="wlc-nav-item" data-dropdown="about">
+      <a href="index.html#wlc-about">ABOUT</a>
+    </div>
+    <a href="index.html#wlc-service">SERVICE</a>
+    <a href="index.html#wlc-resources">RESOURCES</a>
+    <a href="index.html#wlc-events">EVENTS</a>
+    <div class="wlc-nav-item" data-dropdown="ministries">
+      <a href="index.html#wlc-ministries" class="active">CONNECT</a>
+    </div>
+    <a href="index.html#wlc-contact">CONTACT</a>
+  </div>
+  <div class="wlc-nav-right">
+    <a class="wlc-nav-login-logo" id="loginLink" href="#" aria-label="Login to Small Group Management Ministry">
+      <img src="assets/welcome-logo-sgm.png" alt="Small Group Management Ministry - Login" />
+    </a>
+    <button type="button" class="wlc-burger" id="wlcBurger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="wlc-mega-panel" id="wlcMegaPanel">
+  <div class="wlc-mega-inner">
+    <div class="wlc-mega-content" data-content="about">
+      <div class="wlc-mega-item">
+        <a class="wlc-mega-label wlc-mega-textlink" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">VISIT OUR CCF MAIN CHURCH</a>
+      </div>
+      <div class="wlc-mega-divider"></div>
+      <div class="wlc-mega-item">
+        <a class="wlc-mega-label wlc-mega-textlink" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">ICP DISCIPLESHIP CORNER</a>
+      </div>
+    </div>
+    <div class="wlc-mega-content" data-content="ministries">
+      <div class="wlc-mega-item">
+        <a class="wlc-mega-label wlc-mega-textlink" href="dgroup.html">DGROUP</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wlc-mobile-menu" id="wlcMobileMenu">
+  <button type="button" class="wlc-mobile-close" id="wlcMobileClose" aria-label="Close menu">&times;</button>
+  <a href="index.html#wlc-home">HOME</a>
+
+  <div class="wlc-mobile-item">
+    <div class="wlc-mobile-item-row">
+      <a href="index.html#wlc-about">ABOUT</a>
+      <button type="button" class="wlc-mobile-chevron" data-toggle="about" aria-label="Show CCF main church link" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+    <div class="wlc-mobile-submenu" data-submenu="about">
+      <a class="wlc-mobile-submenu-label wlc-mobile-submenu-textlink" href="https://www.ccf.org.ph/" target="_blank" rel="noopener noreferrer">VISIT OUR CCF MAIN CHURCH</a>
+      <div class="wlc-mobile-submenu-divider"></div>
+      <a class="wlc-mobile-submenu-label wlc-mobile-submenu-textlink" href="https://sites.google.com/ccfbeyond.org/icpdgmcorner/home" target="_blank" rel="noopener noreferrer">ICP DISCIPLESHIP CORNER</a>
+    </div>
+  </div>
+
+  <a href="index.html#wlc-service">SERVICE</a>
+  <a href="index.html#wlc-resources">RESOURCES</a>
+  <a href="index.html#wlc-events">EVENTS</a>
+
+  <div class="wlc-mobile-item">
+    <div class="wlc-mobile-item-row">
+      <a href="index.html#wlc-ministries" class="active">CONNECT</a>
+      <button type="button" class="wlc-mobile-chevron" data-toggle="ministries" aria-label="Show Dgroup link" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+    <div class="wlc-mobile-submenu" data-submenu="ministries">
+      <a class="wlc-mobile-submenu-label wlc-mobile-submenu-textlink" href="dgroup.html">DGROUP</a>
+    </div>
+  </div>
+
+  <a href="index.html#wlc-contact">CONTACT</a>
+</div>
+
+<section class="dg-hero" id="wlc-home">
+  <video autoplay muted loop playsinline>
+    <source src="assets/dgroup-video.mp4" type="video/mp4" />
+  </video>
+  <div class="dg-hero-scrim"></div>
+  <div class="dg-scroll-cue">
+    Scroll
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </div>
+</section>
+
+<section class="dg-what">
+  <h2>What is a Dgroup?</h2>
+  <p>A Dgroup, short for discipleship group, is a small group of people who meet regularly, share their lives with each other, study the Bible together, and hold one another accountable — all in the pursuit of becoming more Christ-like.</p>
+</section>
+
+<section class="dg-why">
+  <h2>Why should you join a Dgroup?</h2>
+  <div class="dg-why-grid">
+    <div class="dg-why-card">
+      <div class="icon">C</div>
+      <h3>Community</h3>
+      <p>It fosters fellowship and is a safe space to share life with each other.</p>
+      <p class="verse">"Bear one another's burdens, and thereby fulfill the law of Christ." — Galatians 6:2</p>
+    </div>
+    <div class="dg-why-card">
+      <div class="icon">C</div>
+      <h3>Care</h3>
+      <p>It is a spiritual family where people support, encourage, and pray for each other.</p>
+      <p class="verse">"Let us consider how to stimulate one another to love and good deeds... encouraging one another." — Hebrews 10:24-25</p>
+    </div>
+    <div class="dg-why-card">
+      <div class="icon">C</div>
+      <h3>Character</h3>
+      <p>It helps build character through mutual accountability and building each other up.</p>
+      <p class="verse">"Iron sharpens iron, so one man sharpens another." — Proverbs 27:17</p>
+    </div>
+    <div class="dg-why-card">
+      <div class="icon">C</div>
+      <h3>Collaboration</h3>
+      <p>It is a place where serving God can be done shoulder to shoulder.</p>
+      <p class="verse">"As each one has received a gift, employ it in serving one another." — 1 Peter 4:10</p>
+    </div>
+  </div>
+</section>
+
+<section id="dg-footer">
+  <div class="dg-cta-band">
+    <img class="dg-cta-logo" src="assets/welcome-hero-banner3-logo.png" alt="Looking for a DGROUP?" />
+    <a class="dg-cta-btn join-link" href="#"><span>JOIN NOW!</span></a>
+    <div class="dg-cta-social">
+      <a href="https://www.facebook.com/CCFQatar/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.9h2.6l.4-3.1h-3v-2c0-.9.3-1.5 1.6-1.5H16.6V3.4C16.3 3.3 15.3 3.2 14.2 3.2c-2.4 0-4 1.5-4 4.2v2.3H7.6v3.1h2.6V21h3.3Z"/></svg></a>
+      <a href="https://www.youtube.com/@ccfqatar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.6c-.2-1-1-1.7-1.9-2C18 5.2 12 5.2 12 5.2s-6 0-7.7.4c-1 .2-1.7 1-1.9 2C2 9.3 2 12 2 12s0 2.7.4 4.4c.2 1 1 1.7 1.9 2 1.7.4 7.7.4 7.7.4s6 0 7.7-.4c1-.2 1.7-1 1.9-2 .4-1.7.4-4.4.4-4.4s0-2.7-.4-4.4ZM10 15.2V8.8l5.5 3.2-5.5 3.2Z"/></svg></a>
+      <a href="https://www.instagram.com/ccfqr" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1"/></svg></a>
+    </div>
+  </div>
+  <div class="wlc-footer-bottom">
+    <p>Copyright &copy; 2026 CCF Qatar</p>
+    <div class="wlc-footer-bottom-links">
+      <a href="https://ccf.org.ph/terms-and-conditions" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+      <span>|</span>
+      <a href="https://www.ccf.org.ph/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+    </div>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>

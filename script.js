@@ -9,53 +9,85 @@
 const SGMQ_APP_URL = "https://sgmq-connect.onrender.com";
 
 document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("loginLink").href = SGMQ_APP_URL + "/login";
-  // Every other login entry point (mega dropdown + mobile disclosure row for MINISTRIES) points
-  // at the same URL - wire them all from the one constant above.
-  document.querySelectorAll("#megaMinistriesLoginLink, #mobileMinistriesLoginLink").forEach(function (el) {
-    el.href = SGMQ_APP_URL + "/login";
-  });
+  var loginLinkEl = document.getElementById("loginLink");
+  if (loginLinkEl) loginLinkEl.href = SGMQ_APP_URL + "/login";
   document.querySelectorAll(".join-link").forEach(function (el) {
     el.href = SGMQ_APP_URL + "/join";
   });
 
   const nav = document.getElementById("wlcNav");
+
+  // Nav scroll-to-glass toggle: this must work on EVERY page that shares this nav bar
+  // (index.html's multi-slide hero AND dgroup.html's full-screen video hero), so it lives
+  // here unconditionally rather than gated behind hero-slide-specific elements below.
+  if (nav) {
+    var onScroll = function () {
+      const y = window.scrollY || window.pageYOffset;
+      if (y > 40) nav.classList.add("scrolled");
+      else nav.classList.remove("scrolled");
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  // Home-page-only hero parallax (multi-slide hero with text/logo panels) - not present on
+  // dgroup.html's full-screen video hero, so this whole block is skipped there.
   const heroSection = document.querySelector(".wlc-hero");
   const heroMedia = document.getElementById("heroMedia");
-  if (!nav || !heroSection || !heroMedia) return;
+  if (nav && heroSection && heroMedia) {
+    const heroHeight = heroSection.offsetHeight || window.innerHeight;
+    const heroPanels = Array.from(heroSection.querySelectorAll(".wlc-hero-panel"));
 
-  const heroHeight = heroSection.offsetHeight || window.innerHeight;
-  const heroPanels = Array.from(heroSection.querySelectorAll(".wlc-hero-panel"));
+    var onHeroScroll = function () {
+      const y = window.scrollY || window.pageYOffset;
+      const progress = Math.min(y / (heroHeight * 0.9), 1);
+      const translate = progress * 60;
+      const opacity = 1 - progress;
+      heroMedia.style.transform = "translateY(" + translate + "px)";
+      heroMedia.style.opacity = String(opacity);
+      heroPanels.forEach(function (p) {
+        p.style.opacity = String(opacity);
+        p.style.transform = "translateY(" + (translate * 0.6) + "px)";
+      });
+    };
+    window.addEventListener("scroll", onHeroScroll, { passive: true });
+    onHeroScroll();
 
-  function onScroll() {
-    const y = window.scrollY || window.pageYOffset;
-    if (y > 40) nav.classList.add("scrolled");
-    else nav.classList.remove("scrolled");
+    // Clear space below the fixed nav for the hero panels' text/logo, using the nav's *actual*
+    // rendered height rather than a guessed percentage - it stays a single row on every screen
+    // size now (mobile uses the hamburger overlay below instead of wrapping), but measuring
+    // instead of hardcoding keeps this correct even if the nav's height ever changes. See
+    // --nav-h usage on .wlc-hero-panel / .wlc-hero-logo3 in index.html's <style>.
+    var updateNavHeight = function () {
+      heroSection.style.setProperty("--nav-h", nav.getBoundingClientRect().height + "px");
+    };
+    updateNavHeight();
+    var navResizeObs = new ResizeObserver(updateNavHeight);
+    navResizeObs.observe(nav);
 
-    const progress = Math.min(y / (heroHeight * 0.9), 1);
-    const translate = progress * 60;
-    const opacity = 1 - progress;
-    heroMedia.style.transform = "translateY(" + translate + "px)";
-    heroMedia.style.opacity = String(opacity);
-    heroPanels.forEach(function (p) {
-      p.style.opacity = String(opacity);
-      p.style.transform = "translateY(" + (translate * 0.6) + "px)";
-    });
+    let heroSlideIndex = 0;
+    const heroSlides = heroMedia.querySelectorAll(".wlc-hero-slide");
+
+    function activateHeroSlide(index) {
+      heroPanels.forEach(function (p, i) {
+        p.classList.remove("active");
+        if (i === index) {
+          void p.offsetWidth; // force reflow so the reveal animation restarts every cycle
+          p.classList.add("active");
+        }
+      });
+    }
+    activateHeroSlide(heroSlideIndex);
+
+    if (heroSlides.length > 1) {
+      setInterval(function () {
+        heroSlides[heroSlideIndex].classList.remove("active");
+        heroSlideIndex = (heroSlideIndex + 1) % heroSlides.length;
+        heroSlides[heroSlideIndex].classList.add("active");
+        activateHeroSlide(heroSlideIndex);
+      }, 6000);
+    }
   }
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-
-  // Clear space below the fixed nav for the hero panels' text/logo, using the nav's *actual*
-  // rendered height rather than a guessed percentage - it stays a single row on every screen
-  // size now (mobile uses the hamburger overlay below instead of wrapping), but measuring
-  // instead of hardcoding keeps this correct even if the nav's height ever changes. See
-  // --nav-h usage on .wlc-hero-panel / .wlc-hero-logo3 in index.html's <style>.
-  function updateNavHeight() {
-    heroSection.style.setProperty("--nav-h", nav.getBoundingClientRect().height + "px");
-  }
-  updateNavHeight();
-  var navResizeObs = new ResizeObserver(updateNavHeight);
-  navResizeObs.observe(nav);
 
   // Apple-style full-screen mobile/tablet menu (<=900px): hamburger toggles a full-screen
   // overlay nav, replacing the old approach of letting .wlc-nav-links wrap onto 2-3 rows
@@ -146,29 +178,6 @@ document.addEventListener("DOMContentLoaded", function () {
     megaPanel.addEventListener("mouseleave", closeMegaDelayed);
     window.addEventListener("scroll", function () { if (megaPanel.classList.contains("open")) positionMega(); }, { passive: true });
     window.addEventListener("resize", function () { if (megaPanel.classList.contains("open")) positionMega(); });
-  }
-
-  let heroSlideIndex = 0;
-  const heroSlides = heroMedia.querySelectorAll(".wlc-hero-slide");
-
-  function activateHeroSlide(index) {
-    heroPanels.forEach(function (p, i) {
-      p.classList.remove("active");
-      if (i === index) {
-        void p.offsetWidth; // force reflow so the reveal animation restarts every cycle
-        p.classList.add("active");
-      }
-    });
-  }
-  activateHeroSlide(heroSlideIndex);
-
-  if (heroSlides.length > 1) {
-    setInterval(function () {
-      heroSlides[heroSlideIndex].classList.remove("active");
-      heroSlideIndex = (heroSlideIndex + 1) % heroSlides.length;
-      heroSlides[heroSlideIndex].classList.add("active");
-      activateHeroSlide(heroSlideIndex);
-    }, 6000);
   }
 
   const revealEls = document.querySelectorAll(".wlc-fullbleed, .wlc-reveal, #wlc-contact");
