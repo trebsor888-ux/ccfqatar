@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const abortTimer = controller ? setTimeout(function () { controller.abort(); }, 75000) : null;
       const done = function () {
         clearTimeout(slowTimer); if (abortTimer) clearTimeout(abortTimer);
-        submitBtn.disabled = false; submitBtn.textContent = "Contact Us";
+        submitBtn.disabled = false; submitBtn.textContent = "Submit Request";
       };
 
       fetch(SIGNUP_URL, {
