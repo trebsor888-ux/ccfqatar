@@ -3,16 +3,23 @@
 // if you change the animation/carousel logic there, mirror the change here too.
 
 // ---- ONE constant to update once the real subdomain exists ----
+// Used only for the Dgroup sign-up form's API calls (the site no longer links into the system).
 // Today (no domain yet): the SGMQ-Connect system's Render URL.
 // Later, once ccfqatar.org + sgmq-connect.ccfqatar.org are set up, change this to
 // "https://sgmq-connect.ccfqatar.org" and nothing else in this file needs to change.
 const SGMQ_APP_URL = "https://sgmq-connect.onrender.com";
 
 document.addEventListener("DOMContentLoaded", function () {
-  var loginLinkEl = document.getElementById("loginLink");
-  if (loginLinkEl) loginLinkEl.href = SGMQ_APP_URL + "/login";
+  // The SGM logo (#loginLink) used to be wired to SGMQ_APP_URL + "/login" here. Since Oct 2026
+  // it's display-only: leaders agreed to keep the system out of public view.
+  // Every "Join a Dgroup" button points to the GET IN TOUCH WITH US form in the home page's
+  // contact section, not the system's /join page. Leaders agreed (Oct 2026) to keep SGMQ-Connect
+  // out of public view for now, so the public site no longer links into it for registration.
+  // On index.html the form is on the same page; on any other page (dgroup.html) it's a hop back.
+  var contactHref = document.getElementById("wlc-join-form") ? "#wlc-join-form" : "index.html#wlc-join-form";
   document.querySelectorAll(".join-link").forEach(function (el) {
-    el.href = SGMQ_APP_URL + "/join";
+    el.href = contactHref;
+    el.removeAttribute("target");
   });
 
   const nav = document.getElementById("wlcNav");
@@ -216,19 +223,121 @@ document.addEventListener("DOMContentLoaded", function () {
   startCarousel("wlc-about", 4500);
   startCarousel("wlc-events", 4500);
 
-  // Contact form: no backend endpoint exists yet for this public site — client-only
-  // mailto fallback until a real submission target (backend endpoint or a service like
-  // Formspree) is wired up.
-  const wlcContactForm = document.getElementById("wlcContactForm");
-  if (wlcContactForm) {
-    wlcContactForm.addEventListener("submit", function (e) {
+  // GET IN TOUCH WITH US = Dgroup sign-up (Oct 2026). Posts to SGMQ-Connect, which saves the
+  // person as Pending for an admin to complete and a coordinator to contact on WhatsApp. The
+  // system's CORS allows this site's origin on this one endpoint only.
+  const joinForm = document.getElementById("wlcJoinForm");
+  if (joinForm) {
+    const SIGNUP_URL = SGMQ_APP_URL + "/api/people/website-signup";
+    const formBox = document.getElementById("wlc-join-form");
+    const success = document.getElementById("wlcJoinSuccess");
+    const statusEl = document.getElementById("wlcJoinStatus");
+    const submitBtn = joinForm.querySelector(".wlc-footer-submit");
+    const byId = function (id) { return document.getElementById(id); };
+
+    // Render's free tier sleeps the system after ~15 idle minutes and takes 30-60s to wake.
+    // Ping it once as soon as a visitor heads for the form, so it's awake by the time they submit.
+    var warmed = false;
+    const warmUp = function () {
+      if (warmed) return;
+      warmed = true;
+      fetch(SIGNUP_URL, { method: "GET" }).catch(function () {});
+    };
+    joinForm.addEventListener("focusin", warmUp);
+    document.querySelectorAll(".join-link").forEach(function (el) { el.addEventListener("click", warmUp); });
+    if ("IntersectionObserver" in window && formBox) {
+      const warmObs = new IntersectionObserver(function (entries) {
+        if (entries.some(function (en) { return en.isIntersecting; })) { warmUp(); warmObs.disconnect(); }
+      }, { rootMargin: "300px" });
+      warmObs.observe(formBox);
+    }
+
+    // Same-page join buttons: after the smooth scroll, flash the form box and put the cursor in
+    // First Name so the visitor can start typing straight away.
+    const highlightForm = function () {
+      if (!formBox) return;
+      formBox.classList.remove("wlc-formbox-flash"); void formBox.offsetWidth; formBox.classList.add("wlc-formbox-flash");
+      setTimeout(function () { const f = byId("wlcFirst"); if (f && joinForm.style.display !== "none") f.focus({ preventScroll: true }); }, 700);
+    };
+    document.querySelectorAll('.join-link[href="#wlc-join-form"]').forEach(function (el) { el.addEventListener("click", highlightForm); });
+    if (location.hash === "#wlc-join-form") setTimeout(highlightForm, 400); // arrived from dgroup.html
+
+    const clearError = function (e) { const f = e.target.closest(".wlc-footer-field"); if (f) f.classList.remove("has-error"); };
+    joinForm.addEventListener("input", clearError);
+    joinForm.addEventListener("change", clearError);
+
+    const validate = function () {
+      var ok = true;
+      const check = function (id, good) {
+        byId(id).closest(".wlc-footer-field").classList.toggle("has-error", !good);
+        if (!good) ok = false;
+      };
+      const phone = byId("wlcPhone").value.trim();
+      const digits = phone.replace(/\D/g, "").length;
+      check("wlcFirst", byId("wlcFirst").value.trim().length > 0);
+      check("wlcLast", byId("wlcLast").value.trim().length > 0);
+      check("wlcEmail", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(byId("wlcEmail").value.trim()));
+      check("wlcPhone", /^[+\d\s()-]+$/.test(phone) && digits >= 8 && digits <= 15);
+      check("wlcGender", !!byId("wlcGender").value);
+      check("wlcCivil", !!byId("wlcCivil").value);
+      return ok;
+    };
+
+    const showStatus = function (msg) { statusEl.textContent = msg; statusEl.classList.toggle("show", !!msg); };
+    const UNREACHABLE = "Sorry, we couldn't send your details right now. Please try again in a minute, or email communication@ccfqatar.org.";
+
+    joinForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      const name = document.getElementById("wlcName").value.trim();
-      const email = document.getElementById("wlcEmail").value.trim();
-      const message = document.getElementById("wlcMessage").value.trim();
-      const subject = "Website inquiry from " + name;
-      const body = "Name: " + name + "\nEmail: " + email + "\n\n" + message;
-      window.location.href = "mailto:communication@ccfqatar.org?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      showStatus("");
+      if (!validate()) {
+        const bad = joinForm.querySelector(".has-error input, .has-error select");
+        if (bad) bad.focus();
+        return;
+      }
+      const payload = {
+        first_name: byId("wlcFirst").value.trim(),
+        last_name: byId("wlcLast").value.trim(),
+        email: byId("wlcEmail").value.trim(),
+        phone: byId("wlcPhone").value.trim(),
+        gender: byId("wlcGender").value,
+        civil_status: byId("wlcCivil").value,
+        website: joinForm.elements.website.value,
+      };
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+      // If the server was asleep despite the warm-up, the first request can take up to a minute.
+      const slowTimer = setTimeout(function () { submitBtn.textContent = "Still sending… please wait"; }, 6000);
+      const controller = "AbortController" in window ? new AbortController() : null;
+      const abortTimer = controller ? setTimeout(function () { controller.abort(); }, 75000) : null;
+      const done = function () {
+        clearTimeout(slowTimer); if (abortTimer) clearTimeout(abortTimer);
+        submitBtn.disabled = false; submitBtn.textContent = "Contact Us";
+      };
+
+      fetch(SIGNUP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined,
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data }; });
+        })
+        .then(function (r) {
+          done();
+          if (!r.res.ok) { showStatus(r.data.error || UNREACHABLE); return; }
+          byId("wlcSuccessTitle").textContent = "Thank you, " + payload.first_name + "!";
+          joinForm.style.display = "none";
+          success.classList.add("show");
+        })
+        .catch(function () { done(); showStatus(UNREACHABLE); });
+    });
+
+    byId("wlcJoinAgain").addEventListener("click", function () {
+      joinForm.reset();
+      showStatus("");
+      success.classList.remove("show");
+      joinForm.style.display = "";
     });
   }
 });
