@@ -10,8 +10,9 @@
 const SGMQ_APP_URL = "https://sgmq-connect.onrender.com";
 
 document.addEventListener("DOMContentLoaded", function () {
-  // The SGM logo (#loginLink) used to be wired to SGMQ_APP_URL + "/login" here. Since Oct 2026
-  // it's display-only: leaders agreed to keep the system out of public view.
+  // The SGM logo (#loginLink) used to be a plain link to SGMQ_APP_URL + "/login". Since Oct 2026
+  // leaders agreed to keep the system out of public view, so it's only reachable through the
+  // staff tap pattern + question below.
   // Every "Join a Dgroup" button points to the GET IN TOUCH WITH US form in the home page's
   // contact section, not the system's /join page. Leaders agreed (Oct 2026) to keep SGMQ-Connect
   // out of public view for now, so the public site no longer links into it for registration.
@@ -21,6 +22,119 @@ document.addEventListener("DOMContentLoaded", function () {
     el.href = contactHref;
     el.removeAttribute("target");
   });
+
+  // Staff-only way into SGMQ-Connect (Oct 2026): tap the SGM logo 5 times within 3 seconds and a
+  // "Who are you?" popup asks the staff question. Only the right answer goes on to the system's
+  // login page (where the normal email + password is still required). The answer is stored only
+  // as a SHA-256 hash of its letters, lowercased, so it doesn't sit in plain text in this file.
+  (function () {
+    var logo = document.getElementById("loginLink");
+    if (!logo) return;
+    var TAPS = 5, WINDOW_MS = 3000;
+    var ANSWER_HASHES = [
+      "fd84eec3342d4a9fe3983d8ac7ca3d822f728326b51bfa4246f06b1df9778e1c", // I'm a child of God
+      "8860f28b51d41d2059b4e526a687ed444f247b742bc030b2fa2df6aacbdd49e5"  // I am a child of God
+    ];
+    var FAIL_MSG = "Classified Resource: Authentication Failed";
+
+    var css = document.createElement("style");
+    css.textContent =
+      "#loginLink { cursor:default; touch-action:manipulation; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }" +
+      "#loginLink img { pointer-events:none; -webkit-user-drag:none; }" +
+      ".wlc-sa-backdrop { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(3,8,11,.72); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); opacity:0; transition:opacity .25s ease; }" +
+      ".wlc-sa-backdrop.show { opacity:1; }" +
+      ".wlc-sa-card { position:relative; width:100%; max-width:360px; padding:28px 24px 22px; border-radius:16px; background:rgba(14,26,31,.92); border:1px solid rgba(93,202,165,.28); box-shadow:0 20px 60px rgba(0,0,0,.55); color:#fff; text-align:center; transform:translateY(12px) scale(.97); transition:transform .25s ease; }" +
+      ".wlc-sa-backdrop.show .wlc-sa-card { transform:none; }" +
+      ".wlc-sa-card.shake { animation:wlcSaShake .4s; }" +
+      "@keyframes wlcSaShake { 0%,100%{transform:none} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }" +
+      ".wlc-sa-close { position:absolute; top:10px; right:12px; border:none; background:none; color:rgba(255,255,255,.5); font-size:22px; line-height:1; cursor:pointer; padding:4px; }" +
+      ".wlc-sa-close:hover { color:#fff; }" +
+      ".wlc-sa-logo { height:30px; width:auto; margin:0 auto 14px; display:block; }" +
+      ".wlc-sa-q { margin:0 0 16px; font-size:1.25rem; font-weight:700; letter-spacing:.02em; }" +
+      ".wlc-sa-input { width:100%; box-sizing:border-box; padding:.7rem .85rem; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:#fff; font-size:1rem; font-family:inherit; text-align:center; outline:none; transition:border-color .2s; }" +
+      ".wlc-sa-input:focus { border-color:#2FBF71; }" +
+      ".wlc-sa-input.bad { border-color:#F87171; }" +
+      ".wlc-sa-btn { width:100%; margin-top:12px; padding:.7rem; border:none; border-radius:10px; background:#2FBF71; color:#06140D; font-size:.95rem; font-weight:700; font-family:inherit; cursor:pointer; transition:filter .2s; }" +
+      ".wlc-sa-btn:hover { filter:brightness(1.1); }" +
+      ".wlc-sa-btn:disabled { opacity:.6; cursor:default; }" +
+      ".wlc-sa-msg { min-height:1.2em; margin:12px 0 0; font-size:.82rem; font-weight:600; color:#F87171; }" +
+      ".wlc-sa-msg.ok { color:#5DCAA5; }";
+    document.head.appendChild(css);
+
+    var taps = [];
+    logo.addEventListener("click", function () {
+      var now = Date.now();
+      taps = taps.filter(function (t) { return now - t < WINDOW_MS; });
+      taps.push(now);
+      if (taps.length >= TAPS) { taps = []; openPopup(); }
+    });
+
+    function normalize(s) { return s.toLowerCase().replace(/[^a-z]/g, ""); }
+
+    function sha256(text) {
+      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)).then(function (buf) {
+        return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+      });
+    }
+
+    function openPopup() {
+      if (document.querySelector(".wlc-sa-backdrop")) return;
+      var logoSrc = logo.querySelector("img") ? logo.querySelector("img").getAttribute("src") : "";
+      var backdrop = document.createElement("div");
+      backdrop.className = "wlc-sa-backdrop";
+      backdrop.innerHTML =
+        '<form class="wlc-sa-card" role="dialog" aria-modal="true" aria-labelledby="wlcSaQ" autocomplete="off">' +
+          '<button type="button" class="wlc-sa-close" aria-label="Close">&times;</button>' +
+          (logoSrc ? '<img class="wlc-sa-logo" src="' + logoSrc + '" alt="" />' : "") +
+          '<h4 class="wlc-sa-q" id="wlcSaQ">Who are you?</h4>' +
+          '<input class="wlc-sa-input" type="text" maxlength="60" autocapitalize="off" spellcheck="false" aria-label="Your answer" />' +
+          '<button type="submit" class="wlc-sa-btn">Enter</button>' +
+          '<p class="wlc-sa-msg" role="alert"></p>' +
+        "</form>";
+      document.body.appendChild(backdrop);
+      var card = backdrop.querySelector(".wlc-sa-card");
+      var input = backdrop.querySelector(".wlc-sa-input");
+      var btn = backdrop.querySelector(".wlc-sa-btn");
+      var msg = backdrop.querySelector(".wlc-sa-msg");
+      requestAnimationFrame(function () { backdrop.classList.add("show"); });
+      setTimeout(function () { input.focus(); }, 50);
+
+      function close() {
+        backdrop.classList.remove("show");
+        document.removeEventListener("keydown", onKey);
+        setTimeout(function () { backdrop.remove(); }, 250);
+      }
+      function onKey(e) { if (e.key === "Escape") close(); }
+      document.addEventListener("keydown", onKey);
+      backdrop.querySelector(".wlc-sa-close").addEventListener("click", close);
+      backdrop.addEventListener("click", function (e) { if (e.target === backdrop) close(); });
+      input.addEventListener("input", function () { input.classList.remove("bad"); msg.textContent = ""; msg.classList.remove("ok"); });
+
+      function fail() {
+        msg.textContent = FAIL_MSG;
+        input.classList.add("bad");
+        input.value = "";
+        card.classList.remove("shake");
+        void card.offsetWidth;
+        card.classList.add("shake");
+        btn.disabled = false;
+        input.focus();
+      }
+
+      card.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var answer = normalize(input.value);
+        if (!answer || !window.crypto || !crypto.subtle) { fail(); return; }
+        btn.disabled = true;
+        sha256(answer).then(function (hash) {
+          if (ANSWER_HASHES.indexOf(hash) === -1) { fail(); return; }
+          msg.classList.add("ok");
+          msg.textContent = "Welcome. Opening the login page…";
+          setTimeout(function () { window.location.href = SGMQ_APP_URL + "/login"; }, 700);
+        }, fail);
+      });
+    }
+  })();
 
   const nav = document.getElementById("wlcNav");
 
