@@ -24,18 +24,40 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Staff-only way into SGMQ-Connect (Oct 2026): tap the SGM logo 5 times within 3 seconds and a
-  // "Who are you?" popup asks the staff question. Only the right answer goes on to the system's
-  // login page (where the normal email + password is still required). The answer is stored only
-  // as a SHA-256 hash of its letters, lowercased, so it doesn't sit in plain text in this file.
+  // popup asks the staff question. Only the right answer goes on to the system's login page
+  // (where the normal email + password is still required). The question and answer live in the
+  // system (Settings > Secret Access, where admins change them and see every attempt), so this
+  // file holds neither: it asks /api/secret-access for the question and has the server check
+  // the answer.
   (function () {
     var logo = document.getElementById("loginLink");
     if (!logo) return;
     var TAPS = 5, WINDOW_MS = 3000;
-    var ANSWER_HASHES = [
-      "fd84eec3342d4a9fe3983d8ac7ca3d822f728326b51bfa4246f06b1df9778e1c", // I'm a child of God
-      "8860f28b51d41d2059b4e526a687ed444f247b742bc030b2fa2df6aacbdd49e5"  // I am a child of God
-    ];
+    var ACCESS_API = SGMQ_APP_URL + "/api/secret-access";
     var FAIL_MSG = "Classified Resource: Authentication Failed";
+    var DOWN_MSG = "Classified Resource: Service unavailable. Try again shortly.";
+    var question = null, questionReq = null;
+
+    function fetchWithTimeout(url, opts, ms) {
+      var ctrl = window.AbortController ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ms) : null;
+      opts = opts || {};
+      if (ctrl) opts.signal = ctrl.signal;
+      return fetch(url, opts).finally(function () { if (timer) clearTimeout(timer); });
+    }
+
+    // Asked for on the FIRST tap, so the sleeping Render server is already waking up while the
+    // remaining taps happen. A failed request is forgotten so the next popup tries again.
+    function loadQuestion() {
+      if (question) return Promise.resolve(question);
+      if (!questionReq) {
+        questionReq = fetchWithTimeout(ACCESS_API + "/question", {}, 75000)
+          .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+          .then(function (d) { question = d.question; return question; })
+          .catch(function (err) { questionReq = null; throw err; });
+      }
+      return questionReq;
+    }
 
     var css = document.createElement("style");
     css.textContent =
@@ -51,6 +73,8 @@ document.addEventListener("DOMContentLoaded", function () {
       ".wlc-sa-close:hover { color:#fff; }" +
       ".wlc-sa-logo { height:30px; width:auto; margin:0 auto 14px; display:block; }" +
       ".wlc-sa-q { margin:0 0 16px; font-size:1.25rem; font-weight:700; letter-spacing:.02em; }" +
+      ".wlc-sa-q.loading { font-size:.95rem; font-weight:600; color:rgba(255,255,255,.6); }" +
+      ".wlc-sa-input:disabled { opacity:.5; }" +
       ".wlc-sa-input { width:100%; box-sizing:border-box; padding:.7rem .85rem; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:#fff; font-size:1rem; font-family:inherit; text-align:center; outline:none; transition:border-color .2s; }" +
       ".wlc-sa-input:focus { border-color:#2FBF71; }" +
       ".wlc-sa-input.bad { border-color:#F87171; }" +
@@ -66,16 +90,9 @@ document.addEventListener("DOMContentLoaded", function () {
       var now = Date.now();
       taps = taps.filter(function (t) { return now - t < WINDOW_MS; });
       taps.push(now);
+      if (taps.length === 1) loadQuestion().catch(function () {});
       if (taps.length >= TAPS) { taps = []; openPopup(); }
     });
-
-    function normalize(s) { return s.toLowerCase().replace(/[^a-z]/g, ""); }
-
-    function sha256(text) {
-      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)).then(function (buf) {
-        return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
-      });
-    }
 
     function openPopup() {
       if (document.querySelector(".wlc-sa-backdrop")) return;
@@ -86,9 +103,9 @@ document.addEventListener("DOMContentLoaded", function () {
         '<form class="wlc-sa-card" role="dialog" aria-modal="true" aria-labelledby="wlcSaQ" autocomplete="off">' +
           '<button type="button" class="wlc-sa-close" aria-label="Close">&times;</button>' +
           (logoSrc ? '<img class="wlc-sa-logo" src="' + logoSrc + '" alt="" />' : "") +
-          '<h4 class="wlc-sa-q" id="wlcSaQ">Who are you?</h4>' +
-          '<input class="wlc-sa-input" type="text" maxlength="60" autocapitalize="off" spellcheck="false" aria-label="Your answer" />' +
-          '<button type="submit" class="wlc-sa-btn">Enter</button>' +
+          '<h4 class="wlc-sa-q loading" id="wlcSaQ">Connecting securely…</h4>' +
+          '<input class="wlc-sa-input" type="text" maxlength="60" autocapitalize="off" spellcheck="false" aria-label="Your answer" disabled />' +
+          '<button type="submit" class="wlc-sa-btn" disabled>Enter</button>' +
           '<p class="wlc-sa-msg" role="alert"></p>' +
         "</form>";
       document.body.appendChild(backdrop);
@@ -96,8 +113,19 @@ document.addEventListener("DOMContentLoaded", function () {
       var input = backdrop.querySelector(".wlc-sa-input");
       var btn = backdrop.querySelector(".wlc-sa-btn");
       var msg = backdrop.querySelector(".wlc-sa-msg");
+      var qEl = backdrop.querySelector(".wlc-sa-q");
       requestAnimationFrame(function () { backdrop.classList.add("show"); });
-      setTimeout(function () { input.focus(); }, 50);
+
+      loadQuestion().then(function (q) {
+        qEl.textContent = q;
+        qEl.classList.remove("loading");
+        input.disabled = false;
+        btn.disabled = false;
+        input.focus();
+      }, function () {
+        qEl.textContent = "Unavailable";
+        msg.textContent = DOWN_MSG;
+      });
 
       function close() {
         backdrop.classList.remove("show");
@@ -110,8 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
       backdrop.addEventListener("click", function (e) { if (e.target === backdrop) close(); });
       input.addEventListener("input", function () { input.classList.remove("bad"); msg.textContent = ""; msg.classList.remove("ok"); });
 
-      function fail() {
-        msg.textContent = FAIL_MSG;
+      function fail(text) {
+        msg.textContent = typeof text === "string" ? text : FAIL_MSG;
         input.classList.add("bad");
         input.value = "";
         card.classList.remove("shake");
@@ -123,15 +151,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
       card.addEventListener("submit", function (e) {
         e.preventDefault();
-        var answer = normalize(input.value);
-        if (!answer || !window.crypto || !crypto.subtle) { fail(); return; }
+        if (btn.disabled) return;
+        if (!input.value.trim()) { fail(); return; }
         btn.disabled = true;
-        sha256(answer).then(function (hash) {
-          if (ANSWER_HASHES.indexOf(hash) === -1) { fail(); return; }
-          msg.classList.add("ok");
-          msg.textContent = "Welcome. Opening the login page…";
-          setTimeout(function () { window.location.href = SGMQ_APP_URL + "/login"; }, 700);
-        }, fail);
+        msg.classList.remove("ok");
+        msg.textContent = "";
+        fetchWithTimeout(ACCESS_API + "/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answer: input.value })
+        }, 75000)
+          .then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, data: d }; });
+          })
+          .then(function (res) {
+            if (res.status === 200 && res.data.ok && res.data.ticket) {
+              msg.classList.add("ok");
+              msg.textContent = "Welcome. Opening the login page…";
+              setTimeout(function () {
+                window.location.href = SGMQ_APP_URL + "/login?sa=" + encodeURIComponent(res.data.ticket);
+              }, 700);
+            } else if (res.status === 200) {
+              fail();
+            } else {
+              fail(res.data.error || DOWN_MSG);
+            }
+          }, function () { fail(DOWN_MSG); });
       });
     }
   })();
