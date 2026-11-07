@@ -36,7 +36,9 @@ document.addEventListener("DOMContentLoaded", function () {
     var ACCESS_API = SGMQ_APP_URL + "/api/secret-access";
     var FAIL_MSG = "Classified Resource: Authentication Failed";
     var DOWN_MSG = "Classified Resource: Service unavailable. Try again shortly.";
-    var question = null, questionReq = null;
+    // { enabled, question } from the system. enabled:false = Secret Access switched off in
+    // Settings (system opened to all members): the taps then go straight to the login page.
+    var accessInfo = null, questionReq = null;
 
     function fetchWithTimeout(url, opts, ms) {
       var ctrl = window.AbortController ? new AbortController() : null;
@@ -49,11 +51,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Asked for on the FIRST tap, so the sleeping Render server is already waking up while the
     // remaining taps happen. A failed request is forgotten so the next popup tries again.
     function loadQuestion() {
-      if (question) return Promise.resolve(question);
+      if (accessInfo) return Promise.resolve(accessInfo);
       if (!questionReq) {
         questionReq = fetchWithTimeout(ACCESS_API + "/question", {}, 75000)
           .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(function (d) { question = d.question; return question; })
+          .then(function (d) { accessInfo = { enabled: d.enabled !== false, question: d.question }; return accessInfo; })
           .catch(function (err) { questionReq = null; throw err; });
       }
       return questionReq;
@@ -116,8 +118,13 @@ document.addEventListener("DOMContentLoaded", function () {
       var qEl = backdrop.querySelector(".wlc-sa-q");
       requestAnimationFrame(function () { backdrop.classList.add("show"); });
 
-      loadQuestion().then(function (q) {
-        qEl.textContent = q;
+      loadQuestion().then(function (info) {
+        if (!info.enabled) {
+          qEl.textContent = "Opening the login page…";
+          window.location.href = SGMQ_APP_URL + "/login";
+          return;
+        }
+        qEl.textContent = info.question;
         qEl.classList.remove("loading");
         input.disabled = false;
         btn.disabled = false;
